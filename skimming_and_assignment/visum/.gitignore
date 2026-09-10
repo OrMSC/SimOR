@@ -2,6 +2,7 @@
 *.ver
 *.net
 *.7z
+*.zip
 log.txt
 /TransitNet
 /OldVersionFiles

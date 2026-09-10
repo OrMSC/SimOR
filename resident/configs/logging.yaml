@@ -46,12 +46,12 @@ logging:
       class: logging.Formatter
       # format: '%(levelname)s - %(name)s - %(message)s'
       format: '%(levelname)s - %(message)s'
-      datefmt: '%d/%m/%Y %H:%M:%S'
+      datefmt: '%Y-%m-%dT%H:%M:%S%z'
 
     fileFormatter:
       class: logging.Formatter
       format: '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-      datefmt: '%d/%m/%Y %H:%M:%S'
+      datefmt: '%Y-%m-%dT%H:%M:%S%z'
 
     elapsedFormatter:
       (): activitysim.core.tracing.ElapsedTimeFormatter

@@ -1,0 +1,521 @@
+# ActivitySim Visualizer starter configuration
+#
+# Copy this file to local_config.yaml, then:
+#   1. Replace the two run directories below.
+#   2. Confirm the zone settings match your model.
+#   3. Run: uv run activitysim-viz --config local_config.yaml
+#
+# Standard ActivitySim final_* CSV or Parquet files work without other changes.
+# For other input types or advanced options, start at wiki/00-home.md.
+
+name: Metro Cropped Output
+root: artifacts
+
+# Summarize prepares raw inputs automatically when no valid prepared cache
+# exists, then the dashboard opens at http://localhost:5006.
+pipeline:
+  steps:
+    - prepare
+    - skimjoin
+    # - segment
+    - summarize # will automatically overwrite summaries with a stale cache
+    - dashboard
+  dashboard_mode: export
+  refresh: []
+
+# These are the default ActivitySim file stems. Edit only names that differ in
+# your model outputs; the visualizer accepts either .csv or .parquet files.
+files:
+  households: final_households
+  persons: final_persons
+  tours: final_tours
+  trips: final_trips
+  vehicles: final_vehicles
+  joint_tour_participants: final_joint_tour_participants
+  land_use: final_land_use
+
+fallback_files:
+  land_use: resident/model_data/metro/data_cropped/land_use.csv
+# Required: replace these example directories. Add or remove runs as needed.
+runs:
+  - dir: resident/outputs/test
+    label: Cropped Outputs
+    hh_weight_col:     hh_weight
+    person_weight_col: person_weight
+
+# Confirm these fields before the first run. For a TAZ-only model, keep
+# use_maz false. For a MAZ/TAZ model, set it to true and name both columns.
+zones:
+  use_maz: true
+  maz_col: [MAZ, zone_id]
+  taz_col: TAZ
+
+columns:
+  household_id:   [household_id, hh_id]
+  trip_id:        [trip_id, linked_trip_id]
+  trip_mode:      [trip_mode, linked_trip_mode]
+  trip_num:       [trip_num, linked_trip_num]
+  ptype:          ptype           # person type column in persons file
+  hhsize:         hhsize          # HH size column in households file
+  auto_ownership: auto_ownership  # vehicle count column in households file
+  num_workers:    num_workers     # workers per HH in households file
+  num_adults:     num_adults      # adults per HH in households file
+  # income_segment: [income_segment, income_broad]  # OPTIONAL household income segment/level column for trip enrichment
+  # Prefer a readable purpose column per run. Some survey-style outputs store
+  # numeric codes in primary_purpose/tour_purpose and labels in tour_type.
+  tour_purpose: [primary_purpose, tour_type, purpose]
+  # sample_rate: sample_rate     # OPTIONAL override; if omitted, code auto-detects
+                                 # a households column literally named 'sample_rate'.
+                                 # finalweight = 1/sample_rate (unless explicit run weight columns are provided)
+  # school_esc_outbound: [school_esc_outbound, out_escort_type]
+  # school_esc_inbound: [school_esc_inbound, inb_escort_type]
+
+prepare:
+  category_mappings:
+    raw_statewide_survey:
+      persons:
+        has_license:
+          source: can_drive
+          output_type: boolean
+          preserve_unmapped: false
+          mapping:
+            1: true
+            3: false
+            995: false
+        transit_pass_ownership:
+          source: transit_pass
+          output_type: boolean
+          preserve_unmapped: false
+          mapping:
+            1: false
+            3: false
+            4: false
+            7: true
+            8: true
+            9: true
+            995: null
+        telecommute_frequency:
+          source: telework_freq
+          preserve_unmapped: false
+          mapping:
+            1: 4_days_week
+            2: 4_days_week
+            3: 4_days_week
+            4: 3_days_week
+            5: 2_days_week
+            6: 1_day_week
+            7: No_Telecommute
+            8: No_Telecommute
+            995: null
+            996: null
+        work_from_home:
+          source: job_type
+          output_type: boolean
+          preserve_unmapped: false
+          mapping:
+            1: false
+            2: false
+            3: true
+            4: false
+            5: false
+            995: null
+      day:
+        cdap_activity:
+          source: daily_activity_pattern
+          preserve_unmapped: false
+          mapping:
+            1: M
+            2: N
+            3: H
+      tours:
+        tour_mode:
+          mapping: &raw_statewide_tour_modes
+            1: SCHOOLBUS
+            2: WALK
+            3: WALK_TRANSIT
+            4: PNR_TRANSIT
+            5: KNR_TRANSIT
+            6: BIKE_TRANSIT
+            7: BIKE
+            8: EBIKE
+            9: ESCOOTER
+            10: TAXI
+            11: TNC_SINGLE
+            12: TNC_SHARED
+            13: SOV
+            14: HOV2
+            15: HOV3
+            16: OTHER
+            995: MISSING
+        tour_purpose:
+          mapping:
+            -1: othdiscr
+            1: loop
+            2: work
+            3: othmaint
+            4: school
+            5: othmaint
+            6: escort
+            7: shopping
+            8: eatout
+            9: social
+            10: othmaint
+            12: othdiscr
+            13: othdiscr
+            14: loop
+            995: null
+        tour_category:
+          mapping:
+            1: mandatory
+            2: non_mandatory
+            3: atwork
+            4: joint
+      trips:
+        trip_mode:
+          source: linked_trip_mode
+          mapping: *raw_statewide_tour_modes
+        trip_purpose:
+          source: d_purpose_category
+          mapping:
+            -1: othdiscr
+            1: home
+            2: work
+            3: othmaint
+            4: school
+            5: othmaint
+            6: escort
+            7: shopping
+            8: eatout
+            9: social
+            10: othmaint
+            12: othdiscr
+            13: othdiscr
+            14: home
+            995: null
+    regional_filtered_attributed:
+      day:
+        cdap_activity:
+          source: daily_activity_pattern
+          preserve_unmapped: false
+          mapping:
+            1: M
+            2: N
+            3: H
+  output:
+    file_format: parquet
+  validation:
+    relationship_checks: warn
+  distance_skim:
+    file: ../../model_data/metro/data_cropped/autoSkims__MD.omx       # path relative to run directory, or absolute
+    matrix: SOV_H_DIST__MD
+  non_motorized_distance_skim:
+    file: ../model_data/metro/data_cropped/maz_maz_walk.csv
+    matrix: null
+  time_periods:
+    network_los_file: ../configs/network_los.yaml
+    trip_period_number_column: depart
+    tour_start_period_number_column: start
+    tour_end_period_number_column: end
+  auto_sufficiency_basis: licensed_drivers # licensed_drivers | workers | adults
+  vot_bins:
+    source_column: income_segment
+    output_column: vot_bin
+    fallback_value: M
+    mappings:
+      raw_statewide_survey:
+        1: L
+        2: L
+        3: M
+        4: M
+        5: H
+        6: H
+        995: M
+        999: M
+      survey:
+        1: L
+        2: L
+        3: M
+        4: M
+        5: H
+        6: H
+        999: M
+      override:
+        1: L
+        2: L
+        3: M
+        4: M
+        5: H
+        6: H
+        999: M
+      estimation:
+        1: L
+        2: L
+        3: M
+        4: M
+        5: H
+        6: H
+        999: M
+
+
+skimjoin:
+  # Create optional long-form trip/tour tables with skim values for alternate modes.
+  create_hypothetical_skim_tables: true
+  defaults:
+    config_path: metro_skimjoin_config.yaml
+    skim_files:
+      - '../model_data/metro/data_cropped/*.omx'
+      - ../model_data/metro/data_cropped/maz_stop_walk.csv
+      - ../model_data/metro/data_cropped/maz_maz_walk.csv
+      - ../model_data/metro/data_cropped/bike_maz_logsums_commute.csv
+      - ../model_data/metro/data_cropped/bike_maz_logsums_noncommute.csv
+    network_los_file: ../configs/network_los.yaml
+
+
+
+summarize:
+  weighting_modes: [unweighted, weighted]
+  pnr_tour_modes:
+    - PNR_TRANSIT
+  # OPTIONAL summary-time grouping for outputs with a tour_purpose dimension
+  # group_joint_tour_purposes: true
+  # group_atwork_tour_purposes: true
+  # group_school_tour_purposes: true
+  # Controls additional mapped geography aggregations only. Summaries may still
+  # emit all_geographies totals, and native prepared home geographies such as
+  # home_taz, home_county, and home_mpo can appear when those columns exist.
+  geography:
+    enabled: true
+    # Configured mappings create columns such as home_geo__school_district,
+    # work_geo__county, or land_use_geo__district.
+    aggregations:
+      regional_district:
+        source_zone_system: maz
+        file: ../model_data/metro/data_cropped/land_use.csv
+        zone_id_col: MAZ
+        geography_col: DISTRICT9
+      school_district_k8:
+        source_zone_system: maz
+        file: ../model_data/metro/data_cropped/land_use.csv
+        zone_id_col: MAZ
+        geography_col: DIST_Kto8
+      school_district_9_12:
+        source_zone_system: maz
+        file: ../model_data/metro/data_cropped/land_use.csv
+        zone_id_col: MAZ
+        geography_col: DIST_9to12
+
+dashboard:
+  title: "Metro Cropped Output Visualizer"
+  # logo: ../assets/metro_logo.png
+  enable_maz_geographies: false
+  live:
+    pages:
+      - overview
+      - long_term_choices
+      - daily_travel
+      - joint_travel
+      - tour_summaries
+      - trip_summaries
+      - skim_summaries
+      # - validation:
+      #   - traffic
+      #   - transit
+      #   - vmt
+      #   - regional_validation
+
+
+# Summary-affecting regrouping/normalization belongs under summarize.category_normalization.
+# Cosmetic labels and ordering belong under display.labels.
+display:
+  bar_hover_mode: all # closest | all
+  density_hover_mode: all # closest | all
+  labels:
+    person_type:
+      mapping:
+        all_person_types: All Person Types
+        1: Full-time worker
+        2: Part-time worker
+        3: University student
+        4: Non-worker adult
+        5: Retired
+        6: Student
+        7: Preschool
+
+    transit_subsidy:
+      mapping:
+        0: No subsidy
+        1: Discounted
+        2: Free
+
+    license_holding_status:
+      mapping:
+        has_license: Has License
+        no_license: No License
+
+    transit_pass_ownership_status:
+      mapping:
+        has_transit_pass: Has Transit Pass
+        no_transit_pass: No Transit Pass
+
+    telecommute_frequency:
+      mapping:
+        1_day_week: 1 Day per Week
+        2_days_week: 2 Days per Week
+        3_days_week: 3 Days per Week
+        2_3_days_week: 2-3 Days per Week
+        4_days_week: 4+ Days per Week
+        No_Telecommute: No Telecommute
+
+    mode:
+      mapping:
+        SOV: Drive Alone
+        HOV2: Shared Ride 2
+        HOV3: Shared Ride 3+
+        WALK: Walk
+        BIKE: Bike
+        EBIKE: E-Bike
+        ESCOOTER: E-Scooter
+        WALK_TRANSIT: Walk-Transit
+        BIKE_TRANSIT: Bike-Transit
+        PNR_TRANSIT: PNR-Transit
+        KNR_TRANSIT: KNR-Transit
+        TAXI: Taxi
+        TNC_SINGLE: TNC-Single
+        TNC_SHARED: TNC-Pool
+        SCHOOLBUS: School Bus
+
+
+    # escort:
+    #   mapping:
+    #     not_escorted: No Escort
+    #     pure_escort: Pure Escort
+    #     ride_share: Ride Share
+    #     0: No Escort
+    #     1: Pure Escort
+    #     2: Ride Share
+    #     "": No Escort
+
+    tour_purpose:
+      mapping:
+        all_tour_purposes: All Tour Purposes
+        work: Work
+        school: School
+        joint: Joint
+        escort: Escort
+        shopping: Shopping
+        othmaint: Other Maintenance
+        eatout: Eat Out
+        social: Social
+        othdiscr: Other Discretionary
+        atwork: At-Work
+        loop: Loop
+
+    trip_purpose:
+      mapping:
+        home: Home
+        work: Work
+        school: School
+        escort: Escort
+        shopping: Shopping
+        othmaint: Other Maintenance
+        eatout: Eat Out
+        social: Social
+        othdiscr: Other Discretionary
+        loop: Loop
+
+    stop_purpose:
+      mapping:
+        work: Work
+        school: School
+        escort: Escort
+        shopping: Shopping
+        othmaint: Other Maintenance
+        eatout: Eat Out
+        social: Social
+        othdiscr: Other Discretionary
+
+    tour_composition:
+      mapping:
+        adults: Adults
+        mixed: Mixed
+        children: Children
+
+    tour_category:
+      mapping:
+        mandatory: Mandatory
+        joint: Joint
+        non_mandatory: Non-Mandatory
+        atwork: At-Work
+
+    atwork_subtour_frequency_category:
+      mapping:
+        no_subtours: None
+        eat: 1 Eating Out
+        business1: 1 Business
+        maint: 1 Maintenance
+        business2: 2 Business
+        eat_business: 1 Eating Out + 1 Business
+
+    geography:
+      mapping:
+        all_geographies: All Geographies
+        county: County
+        home_county: County
+        home_mpo: MPO
+        home_taz: TAZ
+        district: District
+        taz: TAZ
+        maz: MAZ
+        school_district: School District
+  
+    mandatory_tour_frequency:
+      # mapping:
+      #   work1: Work
+      #   school1: School
+      #   work2: 2 Work
+      #   school2: 2 School
+      #   work_and_school: 1 Work + 1 School
+      mapping:
+        1: Work
+        3: School
+        2: 2 Work
+        4: 2 School
+        5: 1 Work + 1 School
+
+    daily_activity_pattern:
+      mapping:
+        M : Mandatory
+        N : Non-Mandatory
+        H : At-Home
+
+    facility_type:
+      mapping:
+        1: "Interstate"
+        3: "Principal Arterial"
+        4: "Minor Arterial"
+        5: "Major Collector"
+        6: "Minor Collector"
+        7: "Local Road"
+        30: "Ramp"
+        998: "Bike/Walk"
+
+    commercial_vehicle_type:
+      mapping:
+        car: Car
+        su: Single-Unit Truck
+        mu: Multi-Unit Truck
+
+  # run_colors:
+  #   - "#298c8c" # Teal
+  #   - "#a00000" # Red
+  #   - "#b8b8b8"  # Light gray
+  #   - "#384860"  # Dark blue-gray
+  #   - "#ff7f0e"  # Orange
+    # - "#1f77b4"
+    # - "#ff7f0e"
+    # - "#2ca02c"
+    # - "#d62728"
+    # - "#9467bd"
+    # - "#8c564b"
+    # - "#e377c2"
+    # - "#7f7f7f"

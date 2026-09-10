@@ -4,20 +4,20 @@
 # Preprocessor settings
 preprocessing:
     # Visum automatically exports nodes, links, maz, stop, and routes to Visum_Outputs 
-    input_dir: Visum_Outputs
-    output_dir: input
-    links_file: "Network_link.shp"
-    nodes_file: "Network_node.shp"
-    maz_file: "MAZ_poi_surface.shp"
+    input_dir: Visum_Outputs_LCOG
+    output_dir: input/lcog_2way
+    links_file: "AllStreets_Network_link.shp"
+    nodes_file: "AllStreets_Network_node.shp"
+    maz_file: "MAZ_poi_surface_ea.shp"
     stops: "StopPointsTbl.csv"
     routes: "LineRoutesTbl.csv"
-    walk_modes: ["wlk"] # TSYSSET modes to filter walk links
+    walk_modes: ["PED"] # TSYSSET modes to filter walk links
     # Network directionality
     # True: if walk network should bi-directional
     # False: if walk network should have one link per direction
     # Recommend setting to True if network links are not perfectly coded
     # with both directions coded to allow walk
-    two_way_network: False 
+    two_way_network: True 
     # Optional transit crs. Use for LCOG. Leave blank otherwise.
     # When set, stops are snapped to the nearest node in nodes_file to align
     # them with the pedestrian network if the original stop coordinates came
@@ -34,8 +34,8 @@ settings:
     maz_maz_walk_output: "maz_maz_walk.csv"
     maz_maz_bike_output: "maz_maz_bike.csv"
     maz_stop_walk_output: "maz_stop_walk.csv"
-    input_dir: input    # output_dir of preprocessor
-    output_dir: output
+    input_dir: input/lcog_2way    # output_dir of preprocessor
+    output_dir: output/lcog_2way
 
 # Stop attributes CSV, expectd in input_dir
 # One stop (row) per transit route

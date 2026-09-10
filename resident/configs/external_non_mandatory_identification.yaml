@@ -9,3 +9,5 @@ LOGIT_TYPE: MNL
 EXTERNAL_COL_NAME: is_external_tour
 # set to True if not external but CHOOSER_FILTER_COLUMN_NAME is True
 INTERNAL_COL_NAME: is_internal_tour
+
+EXTERNAL_TOUR_ALT: 0

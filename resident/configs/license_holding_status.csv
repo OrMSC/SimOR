@@ -1,5 +1,5 @@
 Label,Description,Expression,has_license,does_not_have_license
-# dummy specification for license holding status model,,,
+# dummy specification for license holding status model,,,,
 util_constant,alternative specific constant,1,coef_has_license_ASC,0
 util_unavailable_for_under_16,unavailable for persons under 16 years old,@df.age < 16,coef_unavailable,0
 util_age,Age of person in years,@df.age,coef_age,0

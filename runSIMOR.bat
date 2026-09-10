@@ -77,7 +77,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO MODEL_ERROR
 ECHO Non-motorized skims complete.
 
 :: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-:: Run ActivitySim -- full integration not yet implemented
+:: Run ActivitySim -- full integration not yet implemented. This will only run the small cropped metro example dataset.
 :: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ECHO.
 ECHO Running ActivitySim preprocessor.
@@ -91,6 +91,23 @@ ECHO Running ActivitySim (test cropped example)
 "%PYTHON_ACTIVITYSIM%" resident\simulation.py -c resident\configs -d resident\model_data\metro\data_cropped -o outputs\cropped
 IF %ERRORLEVEL% NEQ 0 GOTO MODEL_ERROR
 ECHO ActivitySim complete.
+
+:: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+:: Run the ActivitySim visualizer (optional)
+:: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET "VISUALIZER_DIR=%BASE_DIR%\ext_dependencies\activitysim_visualizer"
+
+IF NOT DEFINED PYTHON_VISUALIZER (
+    ECHO.
+    ECHO Visualizer environment not set up. Skipping visualizer step.
+) ELSE (
+    ECHO.
+    ECHO Running ActivitySim visualizer.
+    CD /D "%BASE_DIR%"
+    "%PYTHON_VISUALIZER%" "%VISUALIZER_DIR%\run.py" --config resident/configs_visualizer/metro_cropped.yaml --export-html metro_cropped.html
+    IF ERRORLEVEL 1 GOTO MODEL_ERROR
+    ECHO Visualizer complete.
+)
 
 ECHO.
 ECHO All steps completed successfully.

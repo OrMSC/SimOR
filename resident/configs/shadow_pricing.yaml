@@ -40,11 +40,14 @@ school_segmentation_targets:
 
 # if target names are the same, they will be combined together
 workplace_segmentation_targets:
-  mngt_busi_scic_arts: EMP_TOTAL
-  white_collar: EMP_TOTAL
-  blue_collar: EMP_TOTAL
-  sales_office: EMP_TOTAL
+  mngt_busi_sci_health: EMP_TOTAL
+  services: EMP_TOTAL
+  sales_retail: EMP_TOTAL
   nat_res_cnstr_maint: EMP_TOTAL
   prod_trans_move: EMP_TOTAL
   missing: EMP_TOTAL
-
+  
+# map model selectors to chooser segment columns used by shadow pricing simulation
+SEGMENT_TO_NAME:
+  school: school_segment
+  workplace: work_segment

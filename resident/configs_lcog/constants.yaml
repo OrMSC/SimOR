@@ -1,0 +1,5 @@
+inherit_settings: True
+KNR_available: False
+
+model_region_name: "LCOG"
+MSA_POP: 380000  # used in vehicle type choice model

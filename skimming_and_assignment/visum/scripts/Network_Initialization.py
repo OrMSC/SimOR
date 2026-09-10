@@ -77,13 +77,14 @@ def net_initialization():
     # CONNECTORS
     # Pull Attributes
     cc_length    = h.GetMulti(Visum.Net.Connectors,r"LENGTH"      , activeOnly = False)
+    tsys         = h.GetMulti(Visum.Net.Connectors,r"TSYSSET"     , activeOnly = False)
     tsys_holding = h.GetMulti(Visum.Net.Connectors,r"TSYS_HOLDING", activeOnly = False) # Holding field that has the default "TSysSet" values pre KnR processes
 
     # Make Visum list with data
-    att_list = [cc_length,tsys_holding]
+    att_list = [cc_length,tsys,tsys_holding]
     
 	# Put Visum list into dataframe
-    cc_df = pd.DataFrame(np.column_stack(att_list), columns = ['cc_length','tsys_holding'])
+    cc_df = pd.DataFrame(np.column_stack(att_list), columns = ['cc_length','tsys','tsys_holding'])
 
     # Convert Length to float
     cc_df['cc_length'] = cc_df['cc_length'].astype(float)
@@ -105,8 +106,11 @@ def net_initialization():
     # Walk
     h.SetMulti(Visum.Net.Connectors ,r"T0_TSYS(WLK)" , cc_df['wlk_time'], activeOnly = False)
     h.SetMulti(Visum.Net.Connectors ,r"T0_TSYS(W)"   , cc_df['wlk_time'], activeOnly = False)
-    # TSys (set to "holding" field which has the default values pre KnR processes)
-    h.SetMulti(Visum.Net.Connectors ,r"TSYSSET"      , cc_df['tsys_holding'], activeOnly = False)
+    # TSys 
+    if "i" in tsys: # Set to "holding" field if "i" (KnR) is in the connectors, the TSYSSET field is not correct
+        h.SetMulti(Visum.Net.Connectors ,r"TSYSSET"      , cc_df['tsys_holding'], activeOnly = False)
+    else:           # Set holding field to TSYSSET if "i" not in TSYSSET, the TSYSSET field is correct
+        h.SetMulti(Visum.Net.Connectors ,r"TSYS_HOLDING" , cc_df['tsys']        , activeOnly = False)
 
 
 

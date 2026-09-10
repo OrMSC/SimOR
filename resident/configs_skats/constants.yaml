@@ -2,3 +2,4 @@ inherit_settings: True
 KNR_available: False
 
 model_region_name: "SKATS"
+MSA_POP: 450000  # used in vehicle type choice model

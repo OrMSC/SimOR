@@ -18,7 +18,92 @@
             ]
         },
         {
-            "name": "Run Cropped Example",
+            "name": "Metro Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/metro/data_full",
+                "-o", "outputs/estimation_metro",
+            ]
+        },
+        {
+            "name": "SKATS Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_skats",
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/skats/data_full",
+                "-o", "outputs/estimation_skats",
+            ]
+        },
+        {
+            "name": "LCOG Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/lcog/data_full",
+                "-o", "outputs/estimation_lcog",
+            ]
+        },
+        {
+            "name": "CALM Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/calm/data_full",
+                "-o", "outputs/estimation_calm",
+            ]
+        },
+        {
+            "name": "Bend Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/bend/data_full",
+                "-o", "outputs/estimation_bend",
+            ]
+        },
+        {
+            "name": "Rogue Estimation Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_estimation", // check the settings.yaml file for run settings!
+                "-c", "configs",
+                "-d", "model_data/rogue/data_full",
+                "-o", "outputs/estimation_rogue",
+            ]
+        },
+        {
+            "name": "Run Cropped Metro Example",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}/resident",
@@ -27,7 +112,21 @@
             "args": [
                 "-c", "configs", // check the settings.yaml file for run settings!
                 "-d", "model_data/metro/data_cropped",
-                "-o", "outputs/cropped",
+                "-o", "outputs/metro_cropped",
+            ]
+        },
+        {
+            "name": "Run Cropped SKATS Example",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_skats",
+                "-c", "configs", // check the settings.yaml file for run settings!
+                "-d", "model_data/skats/data_cropped",
+                "-o", "outputs/skats_cropped",
             ]
         },
         {
@@ -92,6 +191,34 @@
                 "-c", "configs", // check the settings.yaml file for run settings!
                 "-d", "model_data/skats/data_cropped",
                 "-o", "outputs/skats_cropped",
+            ]
+        },
+        {
+            "name": "Run LCOG",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_lcog",
+                "-c", "configs", // check the settings.yaml file for run settings!
+                "-d", "model_data/lcog/data_full",
+                "-o", "outputs/lcog",
+            ]
+        },
+        {
+            "name": "Run LCOG Cropped",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/resident",
+            "program": "simulation.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "configs_lcog",
+                "-c", "configs", // check the settings.yaml file for run settings!
+                "-d", "model_data/lcog/data_cropped",
+                "-o", "outputs/lcog_cropped",
             ]
         },
     ]

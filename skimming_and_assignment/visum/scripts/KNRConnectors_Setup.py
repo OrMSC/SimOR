@@ -116,8 +116,8 @@ def create_knr_connectors():
                 dtsys = Visum.Net.Connectors.DestItemByKey(node, taz).AttValue("TSYSSET")
                 connector_table.append([taz, node, 'D', 7, dtsys])   # destination/egress connector
             else:
-                connector_table.append([taz, node, 'O', 10, 'i'])  # origin/access connector
-                connector_table.append([taz, node, 'D', 10, ''])   # destination/egress connector
+                connector_table.append([taz, node, 'O', 10, ''])  # origin/access connector
+                connector_table.append([taz, node, 'D', 10, ''])  # destination/egress connector
 
     Visum.Log(PRIO, 'write results to file...')
     # with open(FN, 'w') as out_file:
@@ -144,6 +144,7 @@ def create_knr_connectors():
     df_filtered = df[df['typeno'] < 10]  # All preexisting connectors will be TypeNO = 0 or 7
     df_unique = df_filtered.groupby('zoneno').agg(length_max=('length', 'max')).reset_index()
     df = pd.merge(df, df_unique, on='zoneno', how='left')
+    #df['length_max'] = df['length_max'].fillna(df['length'])
     h.SetMulti(Visum.Net.Connectors,r"LENGTH"    ,df['length_max'])
 
 

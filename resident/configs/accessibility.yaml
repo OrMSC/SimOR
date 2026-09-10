@@ -1,2 +1,3 @@
 # columns from land_use table to add to df
 land_use_columns: ['EMP_RET', 'EMP_TOTAL', 'TOTHHS', 'walk_dist_local_bus']
+explicit_chunk: 0.2

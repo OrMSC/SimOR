@@ -90,16 +90,20 @@ escooterSpeed: 6.70
 driveSpeed: 25.00
 indivTour: 1.00000
 
-### Crosswalk between OCCP and size terms
+### Crosswalk between occupation and size terms
 occupation_xwalk:
-  1: mngt_busi_scic_arts
-  2: white_collar
-  3: blue_collar
-  4: sales_office
-  5: nat_res_cnstr_maint
-  6: prod_trans_move
-  999: missing # no occupation 
-  -1: missing # no occupation
+  1: mngt_busi_sci_health # Business, healthcare, or education -> mngt_busi_sci_health
+  2: services # Food prep/hospitality/lodging/arts/media/personal care -> services
+  3: nat_res_cnstr_maint # Landscaping/building maintenance/grounds cleaning/protective services -> nat_res_cnstr_maint
+  4: sales_retail # Sales and retail -> sales_retail
+  5: mngt_busi_sci_health # Life and physical sciences -> mngt_busi_scic_arts
+  6: nat_res_cnstr_maint # Farming/environmental science/forestry -> nat_res_cnstr_maint
+  7: nat_res_cnstr_maint # Construction/installations/repair occupations -> nat_res_cnstr_maint
+  8: prod_trans_move # Production/transportation/material moving -> prod_trans_move
+  9: prod_trans_move # Active military -> prod_trans_move
+  995: missing # Missing Response -> missing
+  997: missing # Other -> missing
+  999: missing # no occupation -> missing
 
 # RIDEHAIL Settings - all costs in dollars, times in minutes
 Taxi_baseFare: 3.00
@@ -180,43 +184,19 @@ max_walk_time: 60
 max_bike_time: 60
 max_walk_distance: 3
 max_bike_distance: 12
-# Location of attractions for associated special size terms
-cabrillo_maz: 23831
-seaworld_maz: 8127
-legoland_maz: 24245
-safari_maz: 14345
-midway_maz: 10646
-zoo_maz: 10561
-torrypines_maz: 4093
+
 
 # Micromobility constants
-microVarCost: 0.39 # dollars
-microFixedCost: 1.00 # dollars
-microRentTime: 1
-microAccessThreshold: 100
+escooterVarCost: 0.39 # dollars
+escooterFixedCost: 1.00 # dollars
+escooterRentTime: 1
+ebikeVarCost: 0.39 # dollars
+ebikeFixedCost: 1.00 # dollars
+ebikeRentTime: 1
 ebikeownership: 0.008
 ebikeMaxDist: 10.50
 escooterMaxDist: 2.00
-
-# Microtransit and NEV constants
-microtransitSpeed: 30
-microtransitCost: 1.25 # dollars
-microtransitWaitTime: 12
-microtransitMaxDist: 4.5
-microtransitDiversionConstant: 6
-microtransitDiversionFactor: 1.25
-microtransitStartPeriod: 9
-microtransitEndPeriod: 32
-nevSpeed: 17
-nevCost: 1.25 # dollars
-nevWaitTime: 12
-nevMaxDist: 3
-nevDwellMinutesPerMile: 0.5
-nevDiversionConstant: 6
-nevDiversionFactor: 1.25
-nevStartPeriod: 9
-nevEndPeriod: 38
-maxWalkIfMTAccessAvailable: 1.0 # Maximum distance to walk to premium transit if microtransit access is available
+microAccessThreshold: 100
 
 # cost of "average" monthly transit pass cost.  Used in transit pass ownership model.
 # cost of pass divided by 2 for age < 18 and 65+.
@@ -240,12 +220,6 @@ LowIncomeBEVRebate: 0
 LowIncomePEVRebate: 0
 MedIncomeBEVRebate: 0
 MedIncomePEVRebate: 0
-
-# MGRAs for Ports of Entry
-SanYsidro_maz_id: 9279
-OtayMesa_maz_id: 9387
-Tecate_maz_id: 22324
-OtayMesaEast_maz_id: 7123
 
 # dispersion parameters used for accessibility calculations
 dispersion_parameter_automobile: -0.05
@@ -356,3 +330,4 @@ OpVTCr: 0.1442
 # model region constants
 KNR_available: True  # SKATS does not have KNR, so set to False in configs_skats/constants.yaml
 model_region_name: "Metro"
+MSA_POP: 2500000  # used in vehicle type choice model

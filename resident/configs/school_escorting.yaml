@@ -12,6 +12,8 @@ ALTS: school_escorting_alts.csv
 
 LOGIT_TYPE: MNL
 
+ESCORTEE_AGE_CUTOFF: 19
+
 NUM_ESCORTEES: 3
 NUM_CHAPERONES: 2
 

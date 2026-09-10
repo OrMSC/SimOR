@@ -21,7 +21,7 @@ util_constant_for_2_visiting_tour,Constant for 2 visiting tour,@df.social==2,coe
 util_constant_for_1_visiting_tour,Constant for 1 visiting tour,@df.social==2,coef_constant_for_1_visiting_tour
 util_1_visiting_and_1_discretionary_tour,1 Visiting and 1 Discretionary Tour,@((df.social==1) & (df.othdiscr==1)),coef_1_visiting_and_1_discretionary_tour
 util_constant_for_2_discretionary_tour,Constant for 2 discretionary tour,othdiscr==2,coef_constant_for_2_discretionary_tour
-util_constant_for_2_discretionary_tour,Constant for 2 discretionary tour,othdiscr==1,coef_constant_for_1_discretionary_tour
+util_constant_for_1_discretionary_tour,Constant for 1 discretionary tour,othdiscr==1,coef_constant_for_1_discretionary_tour
 util_number_of_active_full_time_workers_shopping,Number of Active Full time workers /Shopping,num_travel_active_full_time_workers * shopping,coef_number_of_active_full_time_workers_shopping
 util_number_of_active_nonworkers_shopping,Number of Active Non-workers /Shopping,num_travel_active_non_workers * shopping,coef_number_of_active_nonworkers_shopping
 util_number_of_active_pre_driving_age_school_children_shopping,Number of Active Pre- Driving Age School Children /Shopping,num_travel_active_pre_driving_age_school_kids * shopping,coef_number_of_active_pre_driving_age_school_children_shopping

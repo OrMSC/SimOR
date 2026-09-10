@@ -48,17 +48,10 @@ CONSTANTS:
     - WALK_TRANSIT
     - PNR_TRANSIT
     - KNR_TRANSIT
-    - TNC_TRANSIT
+    - BIKE_TRANSIT
   DRIVE_TO_TRANSIT_MODES:
-    - PNR_LOC
-    - KNR_LOC
-    - TNC_LOC
-    - PNR_PRM
-    - KNR_PRM
-    - TNC_PRM
-    - PNR_MIX
-    - KNR_MIX
-    - TNC_MIX
+    - PNR_TRANSIT
+    - KNR_TRANSIT
   NONMOTORIZED_MODES:
     - WALK
     - BIKE

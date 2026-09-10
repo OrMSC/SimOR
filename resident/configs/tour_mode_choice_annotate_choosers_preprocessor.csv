@@ -1,13 +1,13 @@
-Description,Target,Expression,
-#,,,
-local,_DF_IS_TOUR,'tour_type' in df.columns,
-,is_atwork_subtour,(df.tour_category == 'atwork') if _DF_IS_TOUR else False,
-,_parent_tour_veh,"reindex(tours['selected_vehicle'], df['parent_tour_id']) if 'selected_vehicle' in df.columns else np.nan",
-,_parent_tour_mode,"reindex(tours['tour_mode'], df['parent_tour_id']) if 'tour_mode' in df.columns else np.nan",
-,sov_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_1', np.nan))",
-,sr2_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_2', np.nan))",
-,sr3p_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_3.5', np.nan))",
-#AV factors,,,
+Description,Target,Expression
+#,,
+local,_DF_IS_TOUR,'tour_type' in df.columns
+,is_atwork_subtour,(df.tour_category == 'atwork') if _DF_IS_TOUR else False
+,_parent_tour_veh,"reindex(tours['selected_vehicle'], df['parent_tour_id']) if 'selected_vehicle' in df.columns else np.nan"
+,_parent_tour_mode,"reindex(tours['tour_mode'], df['parent_tour_id']) if 'tour_mode' in df.columns else np.nan"
+,sov_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_1', np.nan))"
+,sr2_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_2', np.nan))"
+,sr3p_veh_option,"np.where(is_atwork_subtour, _parent_tour_veh, df.get('vehicle_occup_3.5', np.nan))"
+#AV factors,,
 SOV tour Vehicle is AV,sov_tour_uses_av,"np.where(pd.notna(df.get('vehicle_occup_1', np.nan)), pd.Series(sov_veh_option, dtype = 'str').str.contains('AV'), False)"
 SR2 tour Vehicle is AV,sr2_tour_uses_av,"np.where(pd.notna(df.get('vehicle_occup_2', np.nan)), pd.Series(sr2_veh_option, dtype = 'str').str.contains('AV'), False)"
 SR3 tour Vehicle is AV,sr3_tour_uses_av,"np.where(pd.notna(df.get('vehicle_occup_3.5', np.nan)), pd.Series(sr3p_veh_option, dtype = 'str').str.contains('AV'), False)"
@@ -24,232 +24,224 @@ SOV AV Auto Terminal Time Factor,autoCPMFactor_DA,"np.where(sov_tour_uses_av, au
 SR2 AV Auto Terminal Time Factor,autoCPMFactor_SR2,"np.where(sr2_tour_uses_av, autoCostPerMileFactorAV, 1.0)"
 SR3+ AV Auto Terminal Time Factor,autoCPMFactor_SR3,"np.where(sr3_tour_uses_av, autoCostPerMileFactorAV, 1.0)"
 AV Min Age to Drive Alone,minimumAgeDA,"np.where(sov_tour_uses_av, minAgeDriveAloneAV, 16)"
-reimburseProportion placeholder,reimburseProportion,0,
-"Tour duration, in hours",tourDuration,df.duration/2,
-#,,,
-,num_participants,df.number_of_participants if _DF_IS_TOUR else 1,
-,is_joint,(df.tour_category=='joint') if _DF_IS_TOUR else False,
-treat tours as work if tour_type not yet decided,tour_type,"df.get('tour_type', default='work')",
-#,,,
-,is_mandatory,(df.tour_category=='mandatory') if 'tour_category' in df.columns else False,
-,is_indiv,~is_joint,
-,is_escort,(tour_type == 'escort') if _DF_IS_TOUR else False,
-# Auto operating costs,,,
-,sov_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sov_veh_option, df.index)) if 'vehicle_occup_1' in df.columns else np.nan",
-,sov_auto_op_cost,"np.where(sov_auto_op_cost.isna() | (pd.Series(sov_veh_option, df.index) == 'non_hh_veh'), costPerMile, sov_auto_op_cost)",
-,sr2_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sr2_veh_option, df.index)) if 'vehicle_occup_2' in df.columns else np.nan",
-,sr2_auto_op_cost,"np.where(sr2_auto_op_cost.isna() | (pd.Series(sr2_veh_option, df.index) == 'non_hh_veh'), costPerMile, sr2_auto_op_cost)",
-,sr3p_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sr3p_veh_option, df.index)) if 'vehicle_occup_3.5' in df.columns else np.nan",
-,sr3p_auto_op_cost,"np.where(sr3p_auto_op_cost.isna() | (pd.Series(sr3p_veh_option, df.index) == 'non_hh_veh'), costPerMile, sr3p_auto_op_cost)",
-# RIDEHAIL,,,
-popempdenpermi calculated in preprocessor and input via landuse file,_origin_density_measure,"reindex(land_use.popempdenpermi, df[orig_col_name])",
-,_dest_density_measure,"reindex(land_use.popempdenpermi, df[dest_col_name])",
-,origin_density,"pd.cut(_origin_density_measure, bins=[-np.inf, 500, 2000, 5000, 15000, np.inf], labels=[5, 4, 3, 2, 1]).astype(int)",
-,dest_density,"pd.cut(_dest_density_measure, bins=[-np.inf, 500, 2000, 5000, 15000, np.inf], labels=[5, 4, 3, 2, 1]).astype(int)",
-,origin_zone_taxi_wait_time_mean,"origin_density.map({k: v for k, v in Taxi_waitTime_mean.items()})",
-,origin_zone_taxi_wait_time_sd,"origin_density.map({k: v for k, v in Taxi_waitTime_sd.items()})",
-,dest_zone_taxi_wait_time_mean,"dest_density.map({k: v for k, v in Taxi_waitTime_mean.items()})",
-,dest_zone_taxi_wait_time_sd,"dest_density.map({k: v for k, v in Taxi_waitTime_sd.items()})",
+reimburseProportion placeholder,reimburseProportion,0
+"Tour duration, in hours",tourDuration,df.duration/2
+#,,
+,num_participants,df.number_of_participants if _DF_IS_TOUR else 1
+,is_joint,(df.tour_category=='joint') if _DF_IS_TOUR else False
+treat tours as work if tour_type not yet decided,tour_type,"df.get('tour_type', default='work')"
+#,,
+,is_mandatory,(df.tour_category=='mandatory') if 'tour_category' in df.columns else False
+,is_indiv,~is_joint
+,is_escort,(tour_type == 'escort') if _DF_IS_TOUR else False
+# Auto operating costs,,
+,sov_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sov_veh_option, df.index)) if 'vehicle_occup_1' in df.columns else np.nan"
+,sov_auto_op_cost,"np.where(sov_auto_op_cost.isna() | (pd.Series(sov_veh_option, df.index) == 'non_hh_veh'), costPerMile, sov_auto_op_cost)"
+,sr2_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sr2_veh_option, df.index)) if 'vehicle_occup_2' in df.columns else np.nan"
+,sr2_auto_op_cost,"np.where(sr2_auto_op_cost.isna() | (pd.Series(sr2_veh_option, df.index) == 'non_hh_veh'), costPerMile, sr2_auto_op_cost)"
+,sr3p_auto_op_cost,"reindex(vehicles.groupby('vehicle_type')['auto_operating_cost'].mean(), pd.Series(sr3p_veh_option, df.index)) if 'vehicle_occup_3.5' in df.columns else np.nan"
+,sr3p_auto_op_cost,"np.where(sr3p_auto_op_cost.isna() | (pd.Series(sr3p_veh_option, df.index) == 'non_hh_veh'), costPerMile, sr3p_auto_op_cost)"
+# RIDEHAIL,,
+popempdenpermi calculated in preprocessor and input via landuse file,_origin_density_measure,"reindex(land_use.popempdenpermi, df[orig_col_name])"
+,_dest_density_measure,"reindex(land_use.popempdenpermi, df[dest_col_name])"
+,origin_density,"pd.cut(_origin_density_measure, bins=[-np.inf, 500, 2000, 5000, 15000, np.inf], labels=[5, 4, 3, 2, 1]).astype(int)"
+,dest_density,"pd.cut(_dest_density_measure.fillna(0), bins=[-np.inf, 500, 2000, 5000, 15000, np.inf], labels=[5, 4, 3, 2, 1]).astype(int)"
+,origin_zone_taxi_wait_time_mean,"origin_density.map({k: v for k, v in Taxi_waitTime_mean.items()})"
+,origin_zone_taxi_wait_time_sd,"origin_density.map({k: v for k, v in Taxi_waitTime_sd.items()})"
+,dest_zone_taxi_wait_time_mean,"dest_density.map({k: v for k, v in Taxi_waitTime_mean.items()})"
+,dest_zone_taxi_wait_time_sd,"dest_density.map({k: v for k, v in Taxi_waitTime_sd.items()})"
 # ,, Note that the mean and standard deviation are not the values for the distribution itself but of the underlying normal distribution it is derived from
-,origTaxiWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_taxi_wait_time_mean, sigma=origin_zone_taxi_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,destTaxiWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_taxi_wait_time_mean, sigma=dest_zone_taxi_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,origin_zone_singleTNC_wait_time_mean,"origin_density.map({k: v for k, v in TNC_single_waitTime_mean.items()})",
-,origin_zone_singleTNC_wait_time_sd,"origin_density.map({k: v for k, v in TNC_single_waitTime_sd.items()})",
-,dest_zone_singleTNC_wait_time_mean,"dest_density.map({k: v for k, v in TNC_single_waitTime_mean.items()})",
-,dest_zone_singleTNC_wait_time_sd,"dest_density.map({k: v for k, v in TNC_single_waitTime_sd.items()})",
-,origSingleTNCWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_singleTNC_wait_time_mean, sigma=origin_zone_singleTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,destSingleTNCWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_singleTNC_wait_time_mean, sigma=dest_zone_singleTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,origin_zone_sharedTNC_wait_time_mean,"origin_density.map({k: v for k, v in TNC_shared_waitTime_mean.items()})",
-,origin_zone_sharedTNC_wait_time_sd,"origin_density.map({k: v for k, v in TNC_shared_waitTime_sd.items()})",
-,dest_zone_sharedTNC_wait_time_mean,"dest_density.map({k: v for k, v in TNC_shared_waitTime_mean.items()})",
-,dest_zone_sharedTNC_wait_time_sd,"dest_density.map({k: v for k, v in TNC_shared_waitTime_sd.items()})",
-,origSharedTNCWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_sharedTNC_wait_time_mean, sigma=origin_zone_sharedTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,destSharedTNCWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_sharedTNC_wait_time_mean, sigma=dest_zone_sharedTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)",
-,totalWaitTaxi,origTaxiWaitTime + destTaxiWaitTime,
-,totalWaitSingleTNC,origSingleTNCWaitTime + destSingleTNCWaitTime,
-,totalWaitSharedTNC,origSharedTNCWaitTime + destSharedTNCWaitTime,
-#parking,,,
-,free_parking_available,(tour_type == 'work') & df.free_parking_at_work if _DF_IS_TOUR else False,
-person has free on-site parking at workplace,freeOnsite,"(free_parking_available)*np.where(is_indiv,1,0)",
-# new reimbursement amount,reimburseProportion,"df.reimburseProportion*np.where(is_indiv,1,0)",
-new daily parking cost with reimbursement in cents,parkingCostDay,"reindex(land_use.exp_daily, df[dest_col_name])",
-new hourly parking cost with reimbursement in cents,parkingCostHour,"reindex(land_use.exp_hourly, df[dest_col_name])",
-new monthly parking cost with reimbursement in cents,parkingCostMonth,"reindex(land_use.exp_monthly, df[dest_col_name])",
-,_telecommute_freq,"df.telecommute_frequency if 'telecommute_frequency' in df.columns else pd.Series('No_Telecommute', index=df.index)",
+,origTaxiWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_taxi_wait_time_mean, sigma=origin_zone_taxi_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,destTaxiWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_taxi_wait_time_mean, sigma=dest_zone_taxi_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,origin_zone_singleTNC_wait_time_mean,"origin_density.map({k: v for k, v in TNC_single_waitTime_mean.items()})"
+,origin_zone_singleTNC_wait_time_sd,"origin_density.map({k: v for k, v in TNC_single_waitTime_sd.items()})"
+,dest_zone_singleTNC_wait_time_mean,"dest_density.map({k: v for k, v in TNC_single_waitTime_mean.items()})"
+,dest_zone_singleTNC_wait_time_sd,"dest_density.map({k: v for k, v in TNC_single_waitTime_sd.items()})"
+,origSingleTNCWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_singleTNC_wait_time_mean, sigma=origin_zone_singleTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,destSingleTNCWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_singleTNC_wait_time_mean, sigma=dest_zone_singleTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,origin_zone_sharedTNC_wait_time_mean,"origin_density.map({k: v for k, v in TNC_shared_waitTime_mean.items()})"
+,origin_zone_sharedTNC_wait_time_sd,"origin_density.map({k: v for k, v in TNC_shared_waitTime_sd.items()})"
+,dest_zone_sharedTNC_wait_time_mean,"dest_density.map({k: v for k, v in TNC_shared_waitTime_mean.items()})"
+,dest_zone_sharedTNC_wait_time_sd,"dest_density.map({k: v for k, v in TNC_shared_waitTime_sd.items()})"
+,origSharedTNCWaitTime,"rng.lognormal_for_df(df, mu=origin_zone_sharedTNC_wait_time_mean, sigma=origin_zone_sharedTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,destSharedTNCWaitTime,"rng.lognormal_for_df(df, mu=dest_zone_sharedTNC_wait_time_mean, sigma=dest_zone_sharedTNC_wait_time_sd, broadcast=True, scale=True).clip(min_waitTime, max_waitTime)"
+,totalWaitTaxi,origTaxiWaitTime + destTaxiWaitTime
+,totalWaitSingleTNC,origSingleTNCWaitTime + destSingleTNCWaitTime
+,totalWaitSharedTNC,origSharedTNCWaitTime + destSharedTNCWaitTime
+#parking,,
+,free_parking_available,(tour_type == 'work') & df.free_parking_at_work if _DF_IS_TOUR else False
+person has free on-site parking at workplace,freeOnsite,"(free_parking_available)*np.where(is_indiv,1,0)"
+# new reimbursement amount,reimburseProportion,"df.reimburseProportion*np.where(is_indiv,1,0)"
+new daily parking cost with reimbursement in cents,parkingCostDay,"reindex(land_use.EXPPRK_DAY, df[dest_col_name])"
+new hourly parking cost with reimbursement in cents,parkingCostHour,"reindex(land_use.EXPPRK_HR, df[dest_col_name])"
+new monthly parking cost with reimbursement in cents,parkingCostMonth,"reindex(land_use.EXPPRK_MNTH, df[dest_col_name])"
+,_telecommute_freq,"df.telecommute_frequency if 'telecommute_frequency' in df.columns else pd.Series('No_Telecommute', index=df.index)"
 Tour parking cost for full-time workers and university students that telecommute less than 2 days,_parkingCostBeforeReimb,"df.ptype.isin([1,3]) * _telecommute_freq.isin(['No_Telecommute', '1_day_week']) * is_indiv * np.minimum(parkingCostMonth, parkingCostDay)"
 Tour parking cost for full-time workers and university students that telecommute less than 2 days,_parkingCostBeforeReimb,"df.ptype.isin([1,3]) * _telecommute_freq.isin(['No_Telecommute', '1_day_week']) * is_indiv * np.minimum(_parkingCostBeforeReimb, parkingCostHour * tourDuration)"
 Tour parking cost for the rest of full-time workers and university students,_parkingCostBeforeReimb,"np.where(df.ptype.isin([1,3]) * ~_telecommute_freq.isin(['No_Telecommute', '1_day_week']) * is_indiv, np.minimum(parkingCostDay, parkingCostHour * tourDuration), _parkingCostBeforeReimb)"
-Tour parking cost for other person types,parkingCostBeforeReimb,"np.where((~df.ptype.isin([1,3]) * is_indiv) | (is_joint), np.minimum(parkingCostDay, parkingCostHour * tourDuration), _parkingCostBeforeReimb)",
-Reimbursement applies to this tour purpose,reimbursePurpose,df.tour_type == 'work' if _DF_IS_TOUR else False,
-Effective parking cost for free parkers,_parkingCost,"0 * np.where(is_indiv*reimbursePurpose*freeOnsite,1,0)",
-Effective parking cost for reimbursed parkers,_parkingCost,"np.where(is_indiv*reimbursePurpose*(1-freeOnsite), np.maximum((1-reimburseProportion) * parkingCostBeforeReimb, 0),_parkingCost)",
-Effective parking cost applied to tour purpose,parkingCost,"np.where(is_joint+is_indiv*(1-reimbursePurpose), parkingCostBeforeReimb,_parkingCost)",
-# cost coef,,,
-,_income_exponent,"np.where(tour_type == 'work', 0.6, 0.5)",
-,cost_sensitivity,"np.maximum(df.income,1000).pow(_income_exponent)",
-,c_cost,coef_income / cost_sensitivity,
-# ivt coef,,,
-,time_factor,"np.where(tour_type=='work', df.time_factor_work, df.time_factor_nonwork)",
-,c_ivt,coef_ivt * time_factor,
-#,,,
-,vot_da,c_ivt / c_cost * 0.6,
-,vot_s2,vot_da / cost_share_s2,
-,vot_s3,vot_da / cost_share_s3,
-,_vot_bin_da,"np.where(vot_da < vot_threshold_low, 1, np.where(vot_da < vot_threshold_med, 2, 3))",
-,_vot_bin_s2,"np.where(vot_s2 < vot_threshold_low, 1, np.where(vot_s2 < vot_threshold_med, 2, 3))",
-,_vot_bin_s3,"np.where(vot_s3 < vot_threshold_low, 1, np.where(vot_s3 < vot_threshold_med, 2, 3))",
-# vot-indexed skims,,,
-,da_dist_skims_out,"(odt_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_DIST'] * (_vot_bin_da == 3))",
-,da_dist_skims_inb,"(dot_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_DIST'] * (_vot_bin_da == 3))",
-,da_cost_skims_out,"(odt_skims['SOV_L_COST'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_COST'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_COST'] * (_vot_bin_da == 3))",
-,da_cost_skims_inb,"(dot_skims['SOV_L_COST'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_COST'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_COST'] * (_vot_bin_da == 3))",
-,da_time_skims_out,"(odt_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_TIME'] * (_vot_bin_da == 3))",
-,da_time_skims_inb,"(dot_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_TIME'] * (_vot_bin_da == 3))",
-,s2_dist_skims_out,(((odt_skims['SR2_L_DIST']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_DIST']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_DIST']) * (_vot_bin_s2 == 3))),
-,s2_dist_skims_inb,(((dot_skims['SR2_L_DIST']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_DIST']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_DIST']) * (_vot_bin_s2 == 3))),
-,s2_cost_skims_out,(((odt_skims['SR2_L_COST']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_COST']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_COST']) * (_vot_bin_s2 == 3))),
-,s2_cost_skims_inb,(((dot_skims['SR2_L_COST']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_COST']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_COST']) * (_vot_bin_s2 == 3))),
-,s2_time_skims_out,(((odt_skims['SR2_L_TIME']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_TIME']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_TIME']) * (_vot_bin_s2 == 3))),
-,s2_time_skims_inb,(((dot_skims['SR2_L_TIME']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_TIME']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_TIME']) * (_vot_bin_s2 == 3))),
-,s3_dist_skims_out,(((odt_skims['SR3_L_DIST']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_DIST']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_DIST']) * (_vot_bin_s3 == 3))),
-,s3_dist_skims_inb,(((dot_skims['SR3_L_DIST']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_DIST']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_DIST']) * (_vot_bin_s3 == 3))),
-,s3_cost_skims_out,(((odt_skims['SR3_L_COST']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_COST']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_COST']) * (_vot_bin_s3 == 3))),
-,s3_cost_skims_inb,(((dot_skims['SR3_L_COST']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_COST']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_COST']) * (_vot_bin_s3 == 3))),
-,s3_time_skims_out,(((odt_skims['SR3_L_TIME']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_TIME']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_TIME']) * (_vot_bin_s3 == 3))),
-,s3_time_skims_inb,(((dot_skims['SR3_L_TIME']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_TIME']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_TIME']) * (_vot_bin_s3 == 3))),
-,walk_time_skims_out,od_skims['DISTWALK'] / walkSpeed * 60,
-,walk_time_skims_inb,do_skims['DISTWALK'] / walkSpeed * 60,
-#,,,
-Determining Tour Origin,origin,df.origin if 'origin' in df.columns else df.home_zone_id if 'home_zone_id' in df.columns else df.workplace_zone_id,
-#,,,
-Person age,age,df.age,
-# Household income (in dollars),income,df.incomeInDollars,
-#,,,
-Joint tour,is_joint,"df.get('tour_category', default=False) == 'joint'",
-Determining Tour Destination,destination,df.destination if 'destination' in df.columns else df.alt_dest,
-Origin MGRA Dwelling Unit Density,oMGRADUDen,"reindex(land_use.duden,origin).clip(upper=300)",
-Origin MGRA Employment Density,oMGRAEmpDen,"reindex(land_use.empden,origin).clip(upper=300)",
-Origin MGRA Total Intersections,oMGRATotInt,"reindex(land_use.totint,origin).clip(upper=300)",
-Destination MGRA Dwelling Unit Density,dMGRADUDen,"reindex(land_use.duden,destination).clip(upper=300)",
-Destination MGRA Employment Density,dMGRAEmpDen,"reindex(land_use.empden,destination).clip(upper=300)",
-Destination MGRA Total Intersections,dMGRATotInt,"reindex(land_use.totint,destination).clip(upper=300)",
-Origin MGRA Mix,oMGRAMix,"np.where(oMGRADUDen+oMGRAEmpDen > 0, (oMGRADUDen*oMGRAEmpDen)/(oMGRADUDen+oMGRAEmpDen),0)",
-Destination MGRA Mix,dMGRAMix,"np.where(dMGRADUDen+dMGRAEmpDen > 0, (dMGRADUDen*dMGRAEmpDen)/(dMGRADUDen+dMGRAEmpDen),0)",
-Origin MGRA Dwelling Unit Density Normalized by Average in Bike Estimation Sample,oMGRADUDenNorm_bike,oMGRADUDen/6.77,
-Origin MGRA Employment Density Normalized by Average in Bike Estimation Sample,oMGRAEmpDenNorm_bike,oMGRAEmpDen/6.47,
-Origin MGRA Dwelling Unit Density Normalized by Average in Walk Estimation Sample,oMGRADUDenNorm_walk,oMGRADUDen/7.18,
-Origin MGRA Total Intersections Normalized by Average in Walk Estimation Sample,oMGRATotIntNorm_walk,oMGRATotInt/56.19,
-Destination MGRA Employment Density Normalized by Average in Walk Estimation Sample,dMGRAEmpDenNorm_walk,dMGRAEmpDen/13.16,
-Normalized Landuse Variable Sum [Origin Employment + DU],LUVarsNormalized_bike,oMGRADUDenNorm_bike + oMGRAEmpDenNorm_bike,
-Normalized Landuse Variable Sum [Origin Intersection + DU],LUVarsNormalized_walk,oMGRADUDenNorm_walk + oMGRATotIntNorm_walk,
-persontype,personType,"df.ptype*np.where(is_indiv,1,0)",
-Origin Terminal Time,oTermTime,"reindex(land_use.TERMINALTIME,origin).fillna(0)",
-Destination Terminal Time,dTermTime,"reindex(land_use.TERMINALTIME,destination).fillna(0)",
-#,,,
-# FIXME need bike logsums and times,,,
-Person is female,female,(df.SEX == 2),
-#bike logsum inbound,bikeLSI,odt_skims['BIKE_LOGSUM'],
-#bike logsum outbound (same as inbound),bikeLSO,dot_skims['BIKE_LOGSUM'],
-#bike time inbound,bike_time_inb,dot_skims['BIKE_TIME'],
-#bike time outbound,bike_time_out,odt_skims['BIKE_TIME'],
-bike logsum inbound,bikeLSI,0,
-bike logsum outbound (same as inbound),bikeLSO,0,
-bike time inbound,bike_time_inb,do_skims['DISTWALK'] / bikeSpeed * 60,
-bike time outbound,bike_time_out,od_skims['DISTWALK'] / bikeSpeed * 60,
-bike availability,bikeAvailable,(bikeLSI > -300) & (bikeLSO > -300) & (od_skims['DISTWALK']>0),
-
-#,,,
-"Cost factor for shared 2 tours, 1/(2^0.8)",costFactorS2,0.57,
-"Cost factor for shared 3+ tours, 1/(3.5^0.8)",costFactorS3,0.37,
-,sov_available,"(age>=minimumAgeDA) * np.where(is_joint,0,1) * np.where(is_atwork_subtour==0,1,np.where(_parent_tour_mode=='DRIVEALONE',1,0))",
-,sr2_available,"np.where(is_joint==0,1,np.where(num_participants>=3,0,1))",
-,walkAvailable,"np.where(walk_time_skims_out < max_walk_time, 1,0) * np.where(walk_time_skims_inb < max_walk_time, 1,0)",
-,SCHBUS_available,(tour_type =='school') & (personType!=3),
-#,,,
-Determining Tour Origin,origin,df.origin if 'origin' in df.columns else df.home_zone_id if 'home_zone_id' in df.columns else df.workplace_zone_id,
-Determining Tour Destination,destination,df.destination if 'destination' in df.columns else df.alt_dest,
-#access egress distances,,,
-,origin_local_dist,"reindex(land_use.walk_dist_local_bus, origin)",
-,origin_micro_local_dist_tncout,"odt_skims['KTW_ACC']/60 * driveSpeed if KNR_available else 0",
-,origin_micro_local_dist_tncin,"odt_skims['WTK_ACC']/60 * driveSpeed if KNR_available else 0",
-,dest_local_dist,"reindex(land_use.walk_dist_local_bus, destination)",
-,dest_micro_local_dist,"reindex(land_use.micro_dist_local_bus, destination)",
-#access egress times,,,
-,origin_local_time,origin_local_dist * 60/walkSpeed,
-,dest_local_time,dest_local_dist * 60/walkSpeed,
-#,,,
-,walk_local_available,(odt_skims['WTW_TIV']>0) & (dot_skims['WTW_TIV']>0),
-,knr_local_available,"(odt_skims['KTW_TIV']>0) & (dot_skims['WTK_TIV']>0) if KNR_available else 0",
-,tnc_local_available,"(odt_skims['KTW_TIV']>0) & (dot_skims['WTK_TIV']>0) if KNR_available else 0",
-#KNR times
-,knr_total_tiv,"(odt_skims['KTW_TIV'] + dot_skims['WTK_TIV']) if KNR_available else 0",
-,knr_total_fwt,"(odt_skims['KTW_FWT']) + (dot_skims['WTK_FWT']) if KNR_available else 0"
-,knr_total_xwt,"(odt_skims['KTW_XWT'] + dot_skims['WTK_XWT']) if KNR_available else 0"
-,knr_acc_egg_time,"(odt_skims['KTW_ACC'] + dot_skims['WTK_EGR']) if KNR_available else 0"
-,knr_other_walk_time,"(odt_skims['KTW_AUX'] + dot_skims['WTK_AUX']) if KNR_available else 0",
-,ktw_odt_xfr,"odt_skims['KTW_XFR'] if KNR_available else 0"
-,wtk_odt_xfr,"dot_skims['WTK_XFR'] if KNR_available else 0"
-,knr_stop_constant,"(odt_skims['KTW_RST'] + dot_skims['WTK_RST']) if KNR_available else 0"
-,knr_veh_constant,"(odt_skims['KTW_VTC'] + dot_skims['WTK_VTC']) if KNR_available else 0"
-# Micromobility times,,,
-ebike time inbound,ebike_time_inb,bike_time_inb * bikeSpeed / ebikeSpeed,
-ebike time outbound,ebike_time_out,bike_time_out * bikeSpeed / ebikeSpeed,
-ebike available,ebike_available,(ebike_time_inb>0) & (ebike_time_out>0),
-escooter time inbound,escooter_time_inb,bike_time_inb * bikeSpeed / escooterSpeed,
-escooter time outbound,escooter_time_out,bike_time_out * bikeSpeed / escooterSpeed,
-escooter available,escooter_available,(escooter_time_inb>0) & (escooter_time_out>0),
-Micromobility access time outbound,micro_access_out,"reindex(land_use.ESCOOACCTIME,origin)",
-Micromobility access time inbound,micro_access_inb,"reindex(land_use.ESCOOACCTIME,destination)",
-ebike max distance availability,ebikeMaxDistance,"(od_skims[('SOV_M_DIST', 'MD')] > ebikeMaxDist)",
-escooter max distance availability,escooterMaxDistance,"(od_skims[('SOV_M_DIST', 'MD')] > escooterMaxDist)",
-# Microtransit and NEV,,,
-microtransit available at origin,microtransit_orig,"reindex(land_use.microtransit, df[orig_col_name])",
-microtransit available at destination,microtransit_dest,"reindex(land_use.microtransit, df[dest_col_name])",
-microtransit operating at time of tour,microtransit_operating,True,
-microtransit available,microtransit_available,(microtransit_orig > 0) & (microtransit_orig == microtransit_dest) & (s3_dist_skims_out < microtransitMaxDist) & (s3_dist_skims_inb < microtransitMaxDist) & microtransit_operating,
-microtransit direct time,microtransit_direct_time,"np.maximum(s3_dist_skims_out/microtransitSpeed*60, s3_time_skims_out) + np.maximum(s3_dist_skims_inb/microtransitSpeed*60, s3_time_skims_inb)",
-microtransit total time,microtransit_time,"np.maximum(microtransit_direct_time + microtransitDiversionConstant, microtransitDiversionFactor*microtransit_direct_time)",
-nev available at origin,nev_orig,"reindex(land_use.nev, df[orig_col_name])",
-nev available at destination,nev_dest,"reindex(land_use.nev, df[dest_col_name])",
-nev operating at time of tour,nev_operating,True,
-nev available,nev_available,(nev_orig > 0) & (nev_orig == nev_dest) & (s3_dist_skims_out < nevMaxDist) & (s3_dist_skims_inb < nevMaxDist) & nev_operating,
-nev direct time,nev_direct_time,"np.maximum(s3_dist_skims_out/nevSpeed*60, s3_time_skims_out) + np.maximum(s3_dist_skims_inb/nevSpeed*60, s3_time_skims_inb)",
-nev total time,nev_time,"np.maximum(nev_direct_time + nevDiversionConstant, nevDiversionFactor*nev_direct_time)",
-# Microtransit and NEV access to transit,,,
-microtransit access to local available,microtransit_local_access_available,(microtransit_orig>0) & (origin_micro_local_dist_tncout<microtransitMaxDist) & (origin_micro_local_dist_tncin<microtransitMaxDist) & microtransit_operating,
-microtransit direct access to local time,microtransit_local_direct_access_time,"(origin_micro_local_dist_tncout/microtransitSpeed*60) + (origin_micro_local_dist_tncin/microtransitSpeed*60)",
-microtransit access to local time,microtransit_local_access_time,"np.maximum(microtransit_local_direct_access_time + microtransitDiversionConstant, microtransitDiversionFactor*microtransit_local_direct_access_time)",
-nev access to local available,nev_local_access_available,(nev_orig>0) & (origin_micro_local_dist_tncout<nevMaxDist) & (origin_micro_local_dist_tncin<nevMaxDist) & nev_operating,
-nev direct access to local time,nev_local_direct_access_time,"(origin_micro_local_dist_tncout/nevSpeed*60) + (origin_micro_local_dist_tncin/nevSpeed*60)",
-nev access to local time,nev_local_access_time,"np.maximum(nev_local_direct_access_time + nevDiversionConstant, nevDiversionFactor*nev_local_direct_access_time)",
-# Microtransit and NEV egress from transit,,,
-microtransit egress from local available,microtransit_local_egress_available,(microtransit_dest>0) & (dest_micro_local_dist>maxWalkIfMTAccessAvailable) & (dest_micro_local_dist<microtransitMaxDist) & microtransit_operating,
-microtransit direct egress from local time,microtransit_local_direct_egress_time,"(dest_micro_local_dist/microtransitSpeed*60) + (dest_micro_local_dist/microtransitSpeed*60)",
-microtransit egress from local time,microtransit_local_egress_time,"np.maximum(microtransit_local_direct_egress_time + microtransitDiversionConstant, microtransitDiversionFactor*microtransit_local_direct_egress_time)",
-nev egress from local available,nev_local_egress_available,(nev_dest>0) & (dest_micro_local_dist>maxWalkIfMTAccessAvailable) & (dest_micro_local_dist<nevMaxDist) & nev_operating,
-nev direct egress from local time,nev_local_direct_egress_time,"(dest_micro_local_dist/nevSpeed*60) + (dest_micro_local_dist/nevSpeed*60)",
-nev egress from local time,nev_local_egress_time,"np.maximum(nev_local_direct_egress_time + nevDiversionConstant, nevDiversionFactor*nev_local_direct_egress_time)",
-# Additional transfers from microtransit and NEV,,,
-microtransit/nev access transfer,mtnev_acc_xfer,microtransit_local_access_available | nev_local_access_available,
-microtransit/nev egress transfer,mtnev_egr_xfer,microtransit_local_egress_available | nev_local_egress_available,
-# transit subsidi pass discount,,,
-transit pas subsidy,transit_pass_subsidy,"df.get('transit_pass_subsidy', False)",
-transit pass ownership,transit_pass_ownership,"df.get('transit_pass_ownership', False)",
-transit subsidy pass discount, transitSubsidyPassDiscount,"np.where(transit_pass_subsidy | transit_pass_ownership,0,1)",
-# PNR with lot choice known -- needs to preface expressions on available lot since -1 index on skims returns error,,,
-park and ride zone id,_CALC_PNR,"'pnr_zone_id' in df.columns",
-has valid pnr lot choice,is_valid_pnr,((df.pnr_zone_id > 0) & (ldt_skims['WTW_TIV']>0) & (dlt_skims['WTW_TIV']>0)) if _CALC_PNR else False,
-outbound auto time for pnr,auto_time_pnr_out,"0 if not _CALC_PNR else np.where(is_valid_pnr, (olt_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (olt_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (olt_skims['SOV_H_TIME'] * (_vot_bin_da == 3)), 0)",
-inbound auto time for pnr,auto_time_pnr_inb,"0 if not _CALC_PNR else np.where(is_valid_pnr, (lot_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (lot_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (lot_skims['SOV_H_TIME'] * (_vot_bin_da == 3)), 0)",
-outbound auto dist for pnr,auto_dist_pnr_out,"0 if not _CALC_PNR else np.where(is_valid_pnr, (olt_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (olt_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (olt_skims['SOV_H_DIST'] * (_vot_bin_da == 3)), 0)",
-inbound auto dist for pnr,auto_dist_pnr_inb,"0 if not _CALC_PNR else np.where(is_valid_pnr, (lot_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (lot_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (lot_skims['SOV_H_DIST'] * (_vot_bin_da == 3)), 0)",
-in vehicle transit time pnr,transit_time_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_TIV'] + dlt_skims['WTW_TIV']), 0)",
-transfers pnr,transfers_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_XFR'] + dlt_skims['WTW_XFR']), 0)",
-transfer walk times pnr,xfer_walk_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_AUX'] + dlt_skims['WTW_AUX']), 0)",
-transfer wait times pnr,xfer_wait_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_XWT'] + dlt_skims['WTW_XWT']), 0)",
-first wait times pnr,iwait_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_FWT'] + dlt_skims['WTW_FWT']), 0)",
-stop type constant pnr,stop_type_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_RST'] + dlt_skims['WTW_RST']), 0)",
-vehicle type constant pnr,vehicle_type_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_VTC'] + dlt_skims['WTW_VTC']), 0)",
-walking access and egress times at dest end pnr,walk_at_dest_end_pnr,"2 * dest_local_time",
+Tour parking cost for other person types,parkingCostBeforeReimb,"np.where((~df.ptype.isin([1,3]) * is_indiv) | (is_joint), np.minimum(parkingCostDay, parkingCostHour * tourDuration), _parkingCostBeforeReimb)"
+Reimbursement applies to this tour purpose,reimbursePurpose,df.tour_type == 'work' if _DF_IS_TOUR else False
+Effective parking cost for free parkers,_parkingCost,"0 * np.where(is_indiv*reimbursePurpose*freeOnsite,1,0)"
+Effective parking cost for reimbursed parkers,_parkingCost,"np.where(is_indiv*reimbursePurpose*(1-freeOnsite), np.maximum((1-reimburseProportion) * parkingCostBeforeReimb, 0),_parkingCost)"
+Effective parking cost applied to tour purpose,parkingCost,"np.where(is_joint+is_indiv*(1-reimbursePurpose), parkingCostBeforeReimb,_parkingCost)"
+# cost coef,,
+,_income_exponent,"np.where(tour_type == 'work', 0.6, 0.5)"
+,cost_sensitivity,"np.maximum(df.income,1000).pow(_income_exponent)"
+,c_cost,coef_income / cost_sensitivity
+# ivt coef,,
+,time_factor,"np.where(tour_type=='work', df.time_factor_work, df.time_factor_nonwork)"
+,c_ivt,coef_ivt * time_factor
+#,,
+,vot_da,c_ivt / c_cost * 0.6
+,vot_s2,vot_da / cost_share_s2
+,vot_s3,vot_da / cost_share_s3
+,_vot_bin_da,"np.where(vot_da < vot_threshold_low, 1, np.where(vot_da < vot_threshold_med, 2, 3))"
+,_vot_bin_s2,"np.where(vot_s2 < vot_threshold_low, 1, np.where(vot_s2 < vot_threshold_med, 2, 3))"
+,_vot_bin_s3,"np.where(vot_s3 < vot_threshold_low, 1, np.where(vot_s3 < vot_threshold_med, 2, 3))"
+# vot-indexed skims,,
+,da_dist_skims_out,(odt_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_DIST'] * (_vot_bin_da == 3))
+,da_dist_skims_inb,(dot_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_DIST'] * (_vot_bin_da == 3))
+,da_cost_skims_out,(odt_skims['SOV_L_COST'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_COST'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_COST'] * (_vot_bin_da == 3))
+,da_cost_skims_inb,(dot_skims['SOV_L_COST'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_COST'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_COST'] * (_vot_bin_da == 3))
+,da_time_skims_out,(odt_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (odt_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (odt_skims['SOV_H_TIME'] * (_vot_bin_da == 3))
+,da_time_skims_inb,(dot_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (dot_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (dot_skims['SOV_H_TIME'] * (_vot_bin_da == 3))
+,s2_dist_skims_out,(((odt_skims['SR2_L_DIST']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_DIST']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_DIST']) * (_vot_bin_s2 == 3)))
+,s2_dist_skims_inb,(((dot_skims['SR2_L_DIST']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_DIST']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_DIST']) * (_vot_bin_s2 == 3)))
+,s2_cost_skims_out,(((odt_skims['SR2_L_COST']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_COST']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_COST']) * (_vot_bin_s2 == 3)))
+,s2_cost_skims_inb,(((dot_skims['SR2_L_COST']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_COST']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_COST']) * (_vot_bin_s2 == 3)))
+,s2_time_skims_out,(((odt_skims['SR2_L_TIME']) * (_vot_bin_s2 == 1)) + ((odt_skims['SR2_M_TIME']) * (_vot_bin_s2 == 2)) + ((odt_skims['SR2_H_TIME']) * (_vot_bin_s2 == 3)))
+,s2_time_skims_inb,(((dot_skims['SR2_L_TIME']) * (_vot_bin_s2 == 1)) + ((dot_skims['SR2_M_TIME']) * (_vot_bin_s2 == 2)) + ((dot_skims['SR2_H_TIME']) * (_vot_bin_s2 == 3)))
+,s3_dist_skims_out,(((odt_skims['SR3_L_DIST']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_DIST']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_DIST']) * (_vot_bin_s3 == 3)))
+,s3_dist_skims_inb,(((dot_skims['SR3_L_DIST']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_DIST']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_DIST']) * (_vot_bin_s3 == 3)))
+,s3_cost_skims_out,(((odt_skims['SR3_L_COST']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_COST']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_COST']) * (_vot_bin_s3 == 3)))
+,s3_cost_skims_inb,(((dot_skims['SR3_L_COST']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_COST']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_COST']) * (_vot_bin_s3 == 3)))
+,s3_time_skims_out,(((odt_skims['SR3_L_TIME']) * (_vot_bin_s3 == 1)) + ((odt_skims['SR3_M_TIME']) * (_vot_bin_s3 == 2)) + ((odt_skims['SR3_H_TIME']) * (_vot_bin_s3 == 3)))
+,s3_time_skims_inb,(((dot_skims['SR3_L_TIME']) * (_vot_bin_s3 == 1)) + ((dot_skims['SR3_M_TIME']) * (_vot_bin_s3 == 2)) + ((dot_skims['SR3_H_TIME']) * (_vot_bin_s3 == 3)))
+,walk_time_skims_out,od_skims['DISTWALK'] / walkSpeed * 60
+,walk_time_skims_inb,do_skims['DISTWALK'] / walkSpeed * 60
+#,,
+Determining Tour Origin,origin,df.origin if 'origin' in df.columns else df.home_zone_id if 'home_zone_id' in df.columns else df.workplace_zone_id
+#,,
+Person age,age,df.age
+# Household income (in dollars),income,df.incomeInDollars
+#,,
+Joint tour,is_joint,"df.get('tour_category', default=False) == 'joint'"
+Determining Tour Destination,destination,df.destination if 'destination' in df.columns else df.alt_dest
+Origin  Dwelling Unit Density,oDUDen,"reindex(land_use.duden,origin).clip(upper=300)"
+Origin  Employment Density,oEmpDen,"reindex(land_use.empden,origin).clip(upper=300)"
+Origin  Total Intersections,oTotInt,"reindex(land_use.totint,origin).clip(upper=300)"
+Destination  Dwelling Unit Density,dDUDen,"reindex(land_use.duden,destination).clip(upper=300)"
+Destination  Employment Density,dEmpDen,"reindex(land_use.empden,destination).clip(upper=300)"
+Destination  Total Intersections,dTotInt,"reindex(land_use.totint,destination).clip(upper=300)"
+Origin  Mix,oMix,"np.where(oDUDen+oEmpDen > 0, (oDUDen*oEmpDen)/(oDUDen+oEmpDen),0)"
+Destination  Mix,dMix,"np.where(dDUDen+dEmpDen > 0, (dDUDen*dEmpDen)/(dDUDen+dEmpDen),0)"
+Origin  Dwelling Unit Density Normalized by Average in Bike Estimation Sample,oDUDenNorm_bike,oDUDen/6.77
+Origin  Employment Density Normalized by Average in Bike Estimation Sample,oEmpDenNorm_bike,oEmpDen/6.47
+Origin  Dwelling Unit Density Normalized by Average in Walk Estimation Sample,oDUDenNorm_walk,oDUDen/7.18
+Origin  Total Intersections Normalized by Average in Walk Estimation Sample,oTotIntNorm_walk,oTotInt/56.19
+Destination  Employment Density Normalized by Average in Walk Estimation Sample,dEmpDenNorm_walk,dEmpDen/13.16
+Normalized Landuse Variable Sum [Origin Employment + DU],LUVarsNormalized_bike,oDUDenNorm_bike + oEmpDenNorm_bike
+Normalized Landuse Variable Sum [Origin Intersection + DU],LUVarsNormalized_walk,oDUDenNorm_walk + oTotIntNorm_walk
+persontype,personType,"df.ptype*np.where(is_indiv,1,0)"
+Origin Terminal Time,oTermTime,"reindex(land_use.TERMINALTIME,origin).fillna(0)"
+Destination Terminal Time,dTermTime,"reindex(land_use.TERMINALTIME,destination).fillna(0)"
+#,,
+Person is female,female,(df.SEX == 2)
+# can have nan logsums for O-D pairs outside the path threshold during logsum calculation so fill with -999 to avoid nan's propogating,,
+,od_bike_logsum,"np.nan_to_num(np.where(is_mandatory, od_skims['logsum_commute'], od_skims['logsum_noncommute']), nan=-999)"
+,do_bike_logsum,"np.nan_to_num(np.where(is_mandatory, do_skims['logsum_commute'], do_skims['logsum_noncommute']), nan=-999)"
+,od_bike_dist,"np.nan_to_num(np.where(is_mandatory, od_skims['distance_commute'], od_skims['distance_noncommute']), nan=999)"
+,do_bike_dist,"np.nan_to_num(np.where(is_mandatory, do_skims['distance_commute'], do_skims['distance_noncommute']), nan=999)"
+bike time inbound,bike_time_inb,od_bike_dist / bikeSpeed * 60
+bike time outbound,bike_time_out,do_bike_dist / bikeSpeed * 60
+bike availability,bikeAvailable,(od_bike_logsum > -500) & (do_bike_logsum > -500)
+#,,
+#,,
+"Cost factor for shared 2 tours, 1/(2^0.8)",costFactorS2,0.57
+"Cost factor for shared 3+ tours, 1/(3.5^0.8)",costFactorS3,0.37
+,sov_available,"(age>=minimumAgeDA) * np.where(is_joint,0,1) * np.where(is_atwork_subtour==0,1,np.where(_parent_tour_mode=='DRIVEALONE',1,0))"
+,sr2_available,"np.where(is_joint==0,1,np.where(num_participants>=3,0,1))"
+,walkAvailable,"np.where(walk_time_skims_out < max_walk_time, 1,0) * np.where(walk_time_skims_inb < max_walk_time, 1,0)"
+,SCHBUS_available,(tour_type =='school') & (personType!=3)
+#,,
+Determining Tour Origin,origin,df.origin if 'origin' in df.columns else df.home_zone_id if 'home_zone_id' in df.columns else df.workplace_zone_id
+Determining Tour Destination,destination,df.destination if 'destination' in df.columns else df.alt_dest
+#access egress distances,,
+,origin_local_dist,"reindex(land_use.walk_dist_local_bus, origin)"
+,origin_premium_dist,"reindex(land_use.walk_dist_premium_transit, origin)"
+,dest_local_dist,"reindex(land_use.walk_dist_local_bus, destination)"
+,dest_premium_dist,"reindex(land_use.walk_dist_premium_transit, destination)"
+#access egress times,,
+,origin_walk_local_time,origin_local_dist * 60/walkSpeed
+,dest_walk_local_time,dest_local_dist * 60/walkSpeed
+,origin_walk_premium_time,origin_premium_dist * 60/walkSpeed
+,dest_walk_premium_time,dest_premium_dist * 60/walkSpeed
+,origin_closest_walk_time,"np.where((origin_walk_local_time > 0) & (origin_walk_premium_time > 0), np.minimum(origin_walk_local_time,origin_walk_premium_time), np.maximum(origin_walk_local_time,origin_walk_premium_time))"
+,dest_closest_walk_time,"np.where((dest_walk_local_time > 0) & (dest_walk_premium_time > 0), np.minimum(dest_walk_local_time,dest_walk_premium_time), np.maximum(dest_walk_local_time,dest_walk_premium_time))"
+# transit mode availabilities,,
+,walk_transit_available,(odt_skims['WTW_TIV']>0) & (dot_skims['WTW_TIV']>0)
+,knr_transit_available,(odt_skims['KTW_TIV']>0) & (dot_skims['WTK_TIV']>0) if KNR_available else 0
+,bike_transit_available,(odt_skims['WTW_TIV']>0) & (dot_skims['WTW_TIV']>0)
+#determine walk times for each transit mode,,
+,WLK_BUS_IVT_OUT,(odt_skims['WTW_BUS'] )
+,WLK_BUS_IVT_INB,(dot_skims['WTW_BUS'] )
+,WLK_PRM_IVT_OUT,(odt_skims['WTW_TIV'] - WLK_BUS_IVT_OUT)
+,WLK_PRM_IVT_INB,(dot_skims['WTW_TIV'] - WLK_BUS_IVT_INB)
+,KNR_BUS_IVT_OUT,(odt_skims['KTW_BUS']) if KNR_available else 0
+,KNR_BUS_IVT_INB,(dot_skims['WTK_BUS']) if KNR_available else 0
+,KNR_PRM_IVT_OUT,(odt_skims['KTW_TIV'] - KNR_BUS_IVT_OUT) if KNR_available else 0
+,KNR_PRM_IVT_INB,(dot_skims['WTK_TIV'] - KNR_BUS_IVT_INB) if KNR_available else 0
+,walk_transit_walk_time_out,"np.where((WLK_BUS_IVT_OUT > 0) & (WLK_PRM_IVT_OUT == 0), origin_walk_local_time+dest_walk_local_time, np.where((WLK_BUS_IVT_OUT == 0) & (WLK_PRM_IVT_OUT > 0), origin_walk_premium_time+dest_walk_premium_time, np.where( (WLK_BUS_IVT_OUT > 0) & (WLK_PRM_IVT_OUT > 0), origin_closest_walk_time+dest_closest_walk_time, 0 ) ) )"
+,walk_transit_walk_time_inb,"np.where((WLK_BUS_IVT_INB > 0) & (WLK_PRM_IVT_INB == 0), origin_walk_local_time+dest_walk_local_time, np.where((WLK_BUS_IVT_INB == 0) & (WLK_PRM_IVT_INB > 0), origin_walk_premium_time+dest_walk_premium_time, np.where( (WLK_BUS_IVT_INB > 0) & (WLK_PRM_IVT_INB > 0), origin_closest_walk_time+dest_closest_walk_time, 0 ) ) )"
+,knr_transit_walk_time_out,"np.where((KNR_BUS_IVT_OUT > 0) & (KNR_PRM_IVT_OUT == 0), dest_walk_local_time, np.where((KNR_BUS_IVT_OUT == 0) & (KNR_PRM_IVT_OUT > 0), dest_walk_premium_time, np.where( (KNR_BUS_IVT_OUT > 0) & (KNR_PRM_IVT_OUT > 0), dest_closest_walk_time, 0 ) ) )"
+,knr_transit_walk_time_inb,"np.where((KNR_BUS_IVT_INB > 0) & (KNR_PRM_IVT_INB == 0), dest_walk_local_time, np.where((KNR_BUS_IVT_INB == 0) & (KNR_PRM_IVT_INB > 0), dest_walk_premium_time, np.where( (KNR_BUS_IVT_INB > 0) & (KNR_PRM_IVT_INB > 0),dest_closest_walk_time, 0 ) ) )"
+#lookup KNR skims since they are currently used for both KNR_TRANSIT and BIKE_TRANSIT modes,,
+,knr_total_tiv,(odt_skims['KTW_TIV'] + dot_skims['WTK_TIV']) if KNR_available else 0
+,knr_total_fwt,(odt_skims['KTW_FWT']) + (dot_skims['WTK_FWT']) if KNR_available else 0
+,knr_total_xwt,(odt_skims['KTW_XWT'] + dot_skims['WTK_XWT']) if KNR_available else 0
+,knr_drive_time,(odt_skims['KTW_ACC'] + dot_skims['WTK_EGR']) if KNR_available else 0
+,knr_drive_dist,(odt_skims['KTW_TDD'] + dot_skims['WTK_TDD']) if KNR_available else 0
+,knr_other_walk_time,(odt_skims['KTW_AUX'] + dot_skims['WTK_AUX']) if KNR_available else 0
+,ktw_odt_xfr,odt_skims['KTW_XFR'] if KNR_available else 0
+,wtk_odt_xfr,dot_skims['WTK_XFR'] if KNR_available else 0
+,knr_stop_constant,(odt_skims['KTW_RST'] + dot_skims['WTK_RST']) if KNR_available else 0
+,knr_veh_constant,(odt_skims['KTW_VTC'] + dot_skims['WTK_VTC']) if KNR_available else 0
+# PNR with lot choice known -- needs to preface expressions on available lot since -1 index on skims returns error,,
+park and ride zone id,_CALC_PNR,'pnr_zone_id' in df.columns
+has valid pnr lot choice,is_valid_pnr,((df.pnr_zone_id > 0) & (ldt_skims['WTW_TIV']>0) & (dlt_skims['WTW_TIV']>0)) if _CALC_PNR else False
+outbound auto time for pnr,auto_time_pnr_out,"0 if not _CALC_PNR else np.where(is_valid_pnr, (olt_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (olt_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (olt_skims['SOV_H_TIME'] * (_vot_bin_da == 3)), 0)"
+inbound auto time for pnr,auto_time_pnr_inb,"0 if not _CALC_PNR else np.where(is_valid_pnr, (lot_skims['SOV_L_TIME'] * (_vot_bin_da == 1)) + (lot_skims['SOV_M_TIME'] * (_vot_bin_da == 2)) + (lot_skims['SOV_H_TIME'] * (_vot_bin_da == 3)), 0)"
+outbound auto dist for pnr,auto_dist_pnr_out,"0 if not _CALC_PNR else np.where(is_valid_pnr, (olt_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (olt_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (olt_skims['SOV_H_DIST'] * (_vot_bin_da == 3)), 0)"
+inbound auto dist for pnr,auto_dist_pnr_inb,"0 if not _CALC_PNR else np.where(is_valid_pnr, (lot_skims['SOV_L_DIST'] * (_vot_bin_da == 1)) + (lot_skims['SOV_M_DIST'] * (_vot_bin_da == 2)) + (lot_skims['SOV_H_DIST'] * (_vot_bin_da == 3)), 0)"
+in vehicle transit time pnr,transit_time_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_TIV'] + dlt_skims['WTW_TIV']), 0)"
+transfers pnr,transfers_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_XFR'] + dlt_skims['WTW_XFR']), 0)"
+transfer walk times pnr,xfer_walk_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_AUX'] + dlt_skims['WTW_AUX']), 0)"
+transfer wait times pnr,xfer_wait_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_XWT'] + dlt_skims['WTW_XWT']), 0)"
+first wait times pnr,iwait_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_FWT'] + dlt_skims['WTW_FWT']), 0)"
+stop type constant pnr,stop_type_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_RST'] + dlt_skims['WTW_RST']), 0)"
+vehicle type constant pnr,vehicle_type_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['WTW_VTC'] + dlt_skims['WTW_VTC']), 0)"
+,PNR_BUS_IVT_OUT,"0 if not _CALC_PNR else np.where(is_valid_pnr, (olt_skims['WTW_BUS'] ),0)"
+,PNR_BUS_IVT_INB,"0 if not _CALC_PNR else np.where(is_valid_pnr, (dlt_skims['WTW_BUS'] ),0)"
+,PNR_PRM_IVT_OUT,"0 if not _CALC_PNR else np.where(is_valid_pnr, (odt_skims['WTW_TIV'] - PNR_BUS_IVT_OUT),0)"
+,PNR_PRM_IVT_INB,"0 if not _CALC_PNR else np.where(is_valid_pnr, (dot_skims['WTW_TIV'] - PNR_BUS_IVT_INB),0)"
+,pnr_transit_walk_time_out,"np.where((PNR_BUS_IVT_OUT > 0) & (PNR_PRM_IVT_OUT == 0), dest_walk_local_time, np.where((PNR_BUS_IVT_OUT == 0) & (PNR_PRM_IVT_OUT > 0), dest_walk_premium_time, np.where( (PNR_BUS_IVT_OUT > 0) & (PNR_PRM_IVT_OUT > 0), dest_closest_walk_time, 0 ) ) )"
+,pnr_transit_walk_time_inb,"np.where((PNR_BUS_IVT_INB > 0) & (PNR_PRM_IVT_INB == 0), dest_walk_local_time, np.where((PNR_BUS_IVT_INB == 0) & (PNR_PRM_IVT_INB > 0), dest_walk_premium_time, np.where( (PNR_BUS_IVT_INB > 0) & (PNR_PRM_IVT_INB > 0),dest_closest_walk_time, 0 ) ) )"
 parking cost pnr,parking_cost_pnr,"0 if ((not _CALC_PNR) or ('PNR_PRKCST' not in land_use.columns)) else np.where(is_valid_pnr,reindex(land_use.PNR_PRKCST, df.pnr_zone_id), 0)"
-fare pnr,fare_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['fare'] + dlt_skims['fare']), 0)",
+fare pnr,fare_pnr,"0 if not _CALC_PNR else np.where(is_valid_pnr, (ldt_skims['fare'] + dlt_skims['fare']), 0)"
+# Micromobility times,,
+E-scooter access time outbound,escooter_access_out,"reindex(land_use.ESCOOACCTIME,origin).fillna(-1)"
+E-scooter access time inbound,escooter_access_inb,"reindex(land_use.ESCOOACCTIME,destination).fillna(-1)"
+E-scooter time outbound,escooter_time_out,bike_time_out * bikeSpeed / escooterSpeed
+E-scooter time inbound,escooter_time_inb,bike_time_inb * bikeSpeed / escooterSpeed
+E-scooter available,escooter_available,(escooter_time_inb>0) & (escooter_time_out>0)
+E-scooter max distance availability,escooterMaxDistance,"(od_skims[('SOV_M_DIST', 'MD')] > escooterMaxDist)"
+E-bike access time outbound,ebike_access_out,"reindex(land_use.EBIKEACCTIME,origin).fillna(-1)"
+E-bike access time inbound,ebike_access_inb,"reindex(land_use.EBIKEACCTIME,destination).fillna(-1)"
+E-bike time outbound,ebike_time_out,bike_time_out * bikeSpeed / ebikeSpeed
+E-bike time inbound,ebike_time_inb,bike_time_inb * bikeSpeed / ebikeSpeed
+E-bike available,ebike_available,(ebike_time_inb>0) & (ebike_time_out>0)
+E-bike max distance availability,ebikeMaxDistance,"(od_skims[('SOV_M_DIST', 'MD')] > ebikeMaxDist)"
+# transit subsidi pass discount,,
+transit pas subsidy,transit_pass_subsidy,"df.get('transit_pass_subsidy', False)"
+transit pass ownership,transit_pass_ownership,"df.get('transit_pass_ownership', False)"
+transit subsidy pass discount,transitSubsidyPassDiscount,"np.where(transit_pass_subsidy | transit_pass_ownership,0,1)"

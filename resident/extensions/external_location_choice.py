@@ -57,7 +57,7 @@ def external_school_location(
 
     estimator = estimation.manager.begin_estimation(state, "external_school_location")
     if estimator:
-        write_estimation_specs(estimator, model_settings, model_settings_file_name)
+        write_estimation_specs(state, estimator, model_settings, model_settings_file_name)
 
     persons_df = iterate_location_choice(
         state=state,
@@ -106,7 +106,7 @@ def external_workplace_location(
         state, "external_workplace_location"
     )
     if estimator:
-        write_estimation_specs(estimator, model_settings, model_settings_file_name)
+        write_estimation_specs(state, estimator, model_settings, model_settings_file_name)
 
     persons_df = iterate_location_choice(
         state=state,

@@ -21,3 +21,7 @@ coef_unavailable,-999.0,F
 coef_ft_asc,-0.240,F
 coef_pt_asc,-0.250,F
 coef_un_asc,0.30,F
+coef_transit_ivt_home_to_work_walk_peak,0,F
+coef_transit_ivt_home_to_work_drive_peak,0,F
+coef_transit_ivt_home_to_school_walk_peak,0,F
+coef_transit_ivt_home_to_school_drive_peak,0,F

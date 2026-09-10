@@ -48,6 +48,15 @@ jobs:
           uv pip install -e . --no-deps
           uv pip list
 
+      # Clone the ActivitySim visualizer and build its virtual environment
+      - name: Set up ActivitySim visualizer
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/ext_dependencies
+          cd $GITHUB_WORKSPACE/ext_dependencies
+          git clone --branch main https://github.com/RSGInc/activitysim_visualizer.git
+          cd activitysim_visualizer
+          uv sync
+
       # Run the test
       - name: Run Metro cropped example test
         run: |
@@ -97,3 +106,48 @@ jobs:
         run: |
           cd ../activitysim
           uv run python $GITHUB_WORKSPACE/resident/test/test_cropped_dataset_skats.py
+
+  lcog_cropped_example:
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+      fail-fast: false
+
+    name: lcog-cropped-example-py${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Clone ActivitySim from SimOR_pnr branch
+      - name: Clone ActivitySim
+        run: |
+          cd ..
+          git clone --branch SimOR_pnr https://github.com/RSGInc/activitysim.git
+          pwd
+          ls -la
+
+      # Install UV
+      - name: Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      # Set up Python with UV
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
+
+      # Install dependencies using UV and the lock file from ActivitySim
+      - name: Install dependencies with UV
+        run: |
+          cd ../activitysim
+          uv sync --frozen
+          uv pip install -e . --no-deps
+          uv pip list
+
+      # Run the test
+      - name: Run LCOG cropped example test
+        run: |
+          cd ../activitysim
+          uv run python $GITHUB_WORKSPACE/resident/test/test_cropped_dataset_lcog.py

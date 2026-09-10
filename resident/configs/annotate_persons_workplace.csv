@@ -4,10 +4,9 @@ Description,Target,Expression
 ,workplace_location_logsum,"np.where(persons.get('external_workplace_zone_id',-1) > 0, persons.get('external_workplace_location_logsum',-1), persons.workplace_location_logsum)"
 ,workplace_modechoice_logsum,"np.where(persons.get('external_workplace_zone_id',-1) > 0, persons.get('external_workplace_modechoice_logsum',-1), persons.workplace_modechoice_logsum)"
 ,distance_to_work,"np.where(workplace_zone_id>=0,skim_dict.lookup(persons.home_zone_id, workplace_zone_id, ('SOV_M_DIST', 'MD')),np.nan)"
-work_zone_area_type,work_zone_area_type,"reindex(land_use.pseudomsa, persons.workplace_zone_id)"
 #,, auto time to work - free flow travel time in both directions. MTC TM1 was MD and MD
 #,,roundtrip_auto_time_to_work
 ,auto_time_home_to_work,"skim_dict.lookup(persons.home_zone_id, workplace_zone_id, ('SOV_M_TIME', 'AM'))"
 ,_auto_time_work_to_home,"skim_dict.lookup(workplace_zone_id, persons.home_zone_id, ('SOV_M_TIME', 'PM'))"
 ,roundtrip_auto_time_to_work,"np.where(workplace_zone_id>=0, auto_time_home_to_work + _auto_time_work_to_home,0)"
-Parking cost at work,exp_daily_work,"reindex(land_use.exp_daily, df.workplace_zone_id).fillna(0)"
+Parking cost at work,exp_daily_work,"reindex(land_use.EXPPRK_DAY, df.workplace_zone_id).fillna(0)"

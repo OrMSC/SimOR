@@ -1,14 +1,14 @@
 # vehicle_type_choice.yaml
 
-SPEC: vehicle_type_choice_op4.csv
-COEFFICIENTS: vehicle_type_choice_op4_coefficients.csv
+SPEC: vehicle_type_choice_op2.csv
+COEFFICIENTS: vehicle_type_choice_op2_coefficients.csv
+PROBS_SPEC: vehicle_type_choice_op2_fuel_type_probs.csv
 
 # SPEC: vehicle_type_choice_op2.csv
 # COEFFICIENTS: vehicle_type_choice_op2_coefficients.csv
 # ALTS: vehicle_type_choice_op2_alternatives.csv
 # # probs must have body_type and vehicle_year columns
 # # probs spec has vehicle age calculated from FLEET_YEAR
-# PROBS_SPEC: vehicle_type_choice_op2_fuel_type_probs.csv
 
 LOGIT_TYPE: MNL
 
@@ -26,8 +26,8 @@ VEHICLE_TYPE_DATA_FILE: vehicle_type_data_extended.csv
 REQUIRE_DATA_FOR_ALL_ALTS: False
 
 # age is computed as (1 + FLEET_YEAR - vehicle_year)
-# FLEET_YEAR: 2017
-FLEET_YEAR: 2022
+FLEET_YEAR: 2017
+# FLEET_YEAR: 2022
 
 # if PROBS_SPEC is supplied, auto operating cost will not be
 #  merged until after a fuel type is selected
@@ -37,7 +37,7 @@ COLS_TO_INCLUDE_IN_VEHICLE_TABLE:
   - MPG
   - vehicle_year
 
-# If PROBS_SPEC is supplied, fuel_type will be ignored
+# If PROBS_SPEC is supplied, fuel_type will be ignored (but is still needed below)
 combinatorial_alts:
   body_type:
     - Car
@@ -78,7 +78,7 @@ combinatorial_alts:
     - BEV
 
 # will write out the created vehicle_type_model_alternatives.csv file
-#  to the base configs directory. Helpful for debugging alternaties.
+#  to the base configs directory. Helpful for debugging alternatives.
 WRITE_OUT_ALTS_FILE: False
 
 preprocessor:
@@ -96,16 +96,8 @@ alts_preprocessor:
 
 COLS_TO_INCLUDE_IN_ALTS_TABLE:
   - age
-  - fuel_type_num_coded
   - body_type_num_coded
-  - Range
-  - MPG
   - is_av
-  - logged_models
-  - logged_makes
-  - logged_chargers_per_capita
-  - SAN
-  - NewPrice
 
 # annotate_persons:
 #   SPEC: annotate_persons_vehicle_type
@@ -125,9 +117,5 @@ annotate_households:
 #   TABLES:
 
 CONSTANTS:
-  # calculated using charger count / population
-  CHARGERS_PER_CAP: 0.00034592
-  # chargers per cap used in vehicle type model estimation
-  # CHARGERS_PER_CAP: 0.000721205
   scenarioYear: 2022
   chargerSensitivityDecayFactor: -0.08245202

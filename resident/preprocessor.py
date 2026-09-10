@@ -28,7 +28,7 @@ class PreprocessorSettings:
     maz_stop_walk_file: str = None  # Path to MAZ stop walk distances file
     fare_skim_input_file: str = None  # Path to non-TOD segmented fare skim matrix file
     times_of_day: list[str] = field(default_factory=lambda: ["EA", "AM", "MD", "PM", "EV"])
-    flat_fare_rate: float = None
+    transit_fare_system: dict = None
     maz_maz_walk_file: str = None
     nodes_file: str = None
     links_file: str = None
@@ -74,40 +74,65 @@ def load_data(settings: PreprocessorSettings) -> tuple[pd.DataFrame, pd.DataFram
 
 
 def set_land_use_maz_index(land_use: pd.DataFrame) -> pd.DataFrame:
-    """Infer the MAZ column, rename it to 'MAZ', and set it as the index.
+    """Infer the MAZ and TAZ columns, rename them, and set MAZ as the index.
     
-    Searches for MAZ column name in land_use and sets 'MAZ' as the DataFrame index.
+    Searches for common MAZ column name variations (MAZ, MAZ_ID, MAZ_NO)
+    and TAZ column name variations (TAZ, TAZ_ID, TAZ_NO), standardizes
+    their names to 'MAZ' and 'TAZ', and sets 'MAZ' as the DataFrame index.
     
     Parameters
     ----------
     land_use : pd.DataFrame
-        Land use table with an 'MAZ' column or MAZ-like index
+        Land use table with MAZ-like and optionally TAZ-like columns
         
     Returns
     -------
     pd.DataFrame
-        Land use table with 'MAZ' as the index
+        Land use table with 'MAZ' as the index and 'TAZ' column renamed
     """
+    # --- MAZ ---
     # If MAZ is already the index, just ensure the name
-    if land_use.index.name and land_use.index.name.upper() in ['MAZ', 'MAZ_ID', 'MAZ_NO']:
+    if land_use.index.name and land_use.index.name == 'MAZ':
         land_use.index.name = 'MAZ'
         print("land_use index already set to MAZ")
-        return land_use
-    
-    # IF MAZ is not already the index, ensure MAZ is a column
-    maz_cols = [col for col in land_use.columns if 'MAZ' in col.upper()]
-    
-    if 'MAZ' not in land_use.columns:
-        raise RuntimeError(
-            f"'MAZ' column not in land_use. Must add 'MAZ' column.\n"
-            + (f"Available MAZ columns are: {maz_cols}. Change MAZ column name to 'MAZ'." if maz_cols else "")
-        )
+    else:
+        # Search for a MAZ-like column
+        maz_col = None
+        for col in land_use.columns:
+            if col.upper() in ['MAZ', 'MAZ_ID', 'MAZ_NO']:
+                maz_col = col
+                break
         
-    if 'MAZ' in land_use.columns and len(maz_cols) > 1:
-        print(f"Warning: Multiple MAZ columns identified in land use csv: {maz_cols}. Defaulting to 'MAZ'.")
+        if maz_col is None:
+            raise RuntimeError(
+                f"Could not identify MAZ column in land_use. "
+                f"Available columns: {list(land_use.columns)}"
+            )
+        
+        # Rename to 'MAZ' if needed, then set as index
+        if maz_col != 'MAZ':
+            land_use = land_use.rename(columns={maz_col: 'MAZ'})
+            print(f"Renamed land_use column '{maz_col}' to 'MAZ'")
+        
+        land_use = land_use.set_index('MAZ')
+        print(f"Set land_use index to 'MAZ' ({len(land_use)} zones)")
     
-    land_use = land_use.set_index('MAZ')
-    print(f"Set land_use index to 'MAZ' ({len(land_use)} zones)")
+    # --- TAZ ---
+    if 'TAZ' in land_use.columns:
+        print("TAZ column already exists in land_use")
+    else:
+        taz_col = None
+        for col in land_use.columns:
+            if col.upper() in ['TAZ', 'TAZ_ID', 'TAZ_NO']:
+                taz_col = col
+                break
+        
+        if taz_col is None:
+            print("Warning: Could not identify TAZ column in land_use, skipping TAZ rename")
+        else:
+            land_use = land_use.rename(columns={taz_col: 'TAZ'})
+            print(f"Renamed land_use column '{taz_col}' to 'TAZ'")
+    
     return land_use
 
 
@@ -212,6 +237,69 @@ def check_ids(
             print(f"Original IDs saved to 'non_unique_household_id' column")
         
         return households, persons
+
+
+def add_transit_fare_factor(
+    persons: pd.DataFrame,
+    settings: PreprocessorSettings,
+) -> pd.DataFrame:
+    """Add person-level TRANSIT_FF using the Oregon transit fare rules."""
+    if "TRANSIT_FF" in persons.columns:
+        print("TRANSIT_FF column already exists in persons, skipping fare factor calculation")
+        return persons
+
+    fare_system = settings.transit_fare_system.get("name", "").upper() if settings.transit_fare_system else None
+    valid_fare_systems = ["LTD", "CHERRIOTS", "TRIMET", "RVTD", "GRANTS_PASS", "FREE"]
+    assert fare_system is None or fare_system in valid_fare_systems, f"Invalid transit_fare_system '{fare_system}'. Valid options are: {valid_fare_systems}"
+
+    if fare_system is None:
+        print("No transit_fare_system configured or inferred. Defaulting TRANSIT_FF to 1.0.")
+        persons["TRANSIT_FF"] = 1.0
+        return persons
+
+    if fare_system == "FREE":
+        persons["TRANSIT_FF"] = 0.0
+        print("Added TRANSIT_FF to persons for free-fare transit service")
+        return persons
+    
+    full_fare = settings.transit_fare_system["flat_fare_rate"]
+
+    for column_name in ["age", "AGE", "AGEP"]:
+        if column_name in persons.columns:
+            age = pd.to_numeric(persons[column_name], errors="coerce")
+            break
+    else:
+        raise RuntimeError("persons table must include an age column (one of: age, AGE, AGEP)")
+
+    is_k12_student = persons.SCHG.fillna(-1).between(1, 14, inclusive="both")
+    transit_ff = pd.Series(1.0, index=persons.index, dtype=float)
+
+    if fare_system == "LTD":
+        transit_ff.loc[age <= 18] = 0.85 / full_fare
+        transit_ff.loc[(age <= 18) & is_k12_student] = 0.0
+        transit_ff.loc[age <= 5] = 0.0
+        transit_ff.loc[age >= 65] = 0.0
+    elif fare_system == "CHERRIOTS":
+        transit_ff.loc[age <= 18] = 0.0
+        transit_ff.loc[age >= 60] = 0.80 / full_fare
+    elif fare_system == "TRIMET":
+        transit_ff.loc[age.between(7, 17, inclusive="both")] = 1.40 / full_fare
+        transit_ff.loc[age <= 6] = 0.0
+        transit_ff.loc[age >= 65] = 1.40 / full_fare
+    elif fare_system == "RVTD":
+        transit_ff.loc[age.between(10, 17, inclusive="both")] = 1.00 / full_fare
+        transit_ff.loc[age <= 9] = 1.00 / full_fare
+        transit_ff.loc[age >= 62] = 1.00 / full_fare
+    elif fare_system == "GRANTS_PASS":
+        transit_ff.loc[age.between(6, 16, inclusive="both")] = 0.50 / full_fare
+        transit_ff.loc[age <= 5] = 0.0
+        transit_ff.loc[age >= 62] = 0.50 / full_fare
+    else:
+        raise RuntimeError(f"Unsupported transit_fare_system '{fare_system}'")
+
+    persons["TRANSIT_FF"] = transit_ff.round(3)
+    print(f"Added TRANSIT_FF to persons using transit_fare_system='{fare_system}'")
+    return persons
 
 
 def add_tothhs(land_use: pd.DataFrame, households: pd.DataFrame) -> pd.DataFrame:
@@ -736,16 +824,20 @@ def create_flat_fare_skim(settings: PreprocessorSettings, land_use: pd.DataFrame
     omx with matrices fare__[time_of_day]
     """
     print("Preprocessing flat-fare skim matrix.")
-    if settings.flat_fare_rate is None:
+    if settings.transit_fare_system["flat_fare_rate"] is None:
         print("No flat-fare rate provided, skipping flat-fare skim creation.")
         return 
+    
+    flat_fare_rate = settings.transit_fare_system["flat_fare_rate"]
+    assert flat_fare_rate >= 0, "Flat fare rate must be non-negative"
+    print(f"Using flat fare rate of ${flat_fare_rate} for skim matrix")
     
     # Get TAZ IDs from land_use
     taz_ids = np.sort(land_use['TAZ'].unique())
     n_zones = len(taz_ids)
     
-    # Create falt fare matrix
-    fare_matrix = np.full((n_zones, n_zones), settings.flat_fare_rate, dtype=np.float32)
+    # Create flat fare matrix
+    fare_matrix = np.full((n_zones, n_zones), flat_fare_rate, dtype=np.float32)
     
     output_fare_skim_file_name = settings.output_dir / "fares.omx"
     with omx.open_file(output_fare_skim_file_name, 'w') as flat_fare_skim:
@@ -759,7 +851,7 @@ def create_flat_fare_skim(settings: PreprocessorSettings, land_use: pd.DataFrame
     
 def add_exp_costs(land_use: pd.DataFrame, settings: PreprocessorSettings, ) -> pd.DataFrame:
     """
-    Adds expected parking costs exp_hourly, exp_daily, exp_monthly,
+    Adds expected parking costs EXPPRK_HR, EXPPRK_DAY, EXPPRK_MNTH,
     if file is provided.
     
     Parameters
@@ -772,7 +864,7 @@ def add_exp_costs(land_use: pd.DataFrame, settings: PreprocessorSettings, ) -> p
     Returns
     -------
     land_use:
-        Updated dataframe with [exp_hourly, exp_daily, exp_monthly]
+        Updated dataframe with [EXPPRK_HR, EXPPRK_DAY, EXPPRK_MNTH]
     """
     
     if settings.exp_parking_costs_file is None:
@@ -780,15 +872,16 @@ def add_exp_costs(land_use: pd.DataFrame, settings: PreprocessorSettings, ) -> p
         return land_use
     
     exp_costs = pd.read_csv(settings.exp_parking_costs_file).rename(columns = {'mgra': 'MAZ'}).set_index('MAZ')
-    cost_cols = [col for col in exp_costs.columns if 'exp' in col]
+    exp_costs.index = exp_costs.index.astype(int)
+    keep_cols = [col for col in exp_costs.columns if 'EXPPRK' in col] + ['PARKAREA']
     land_use = pd.merge(
         land_use, 
-        exp_costs[cost_cols], 
+        exp_costs[keep_cols], 
         left_index=True,
         right_index=True, 
         how='left',
         validate='1:1')
-    print(f"Added columns to land_use: {cost_cols}")
+    print(f"Added columns to land_use: {keep_cols}")
     return land_use
     
 def preprocess(settings: PreprocessorSettings) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -818,6 +911,9 @@ def preprocess(settings: PreprocessorSettings) -> tuple[pd.DataFrame, pd.DataFra
     
     # Fix duplicate household IDs, check for correct names
     households, persons = check_ids(households, persons)
+
+    # Add person-level transit fare factor from fare policy rules
+    persons = add_transit_fare_factor(persons, settings)
     
     # Add TOTHHS and TOTPOP
     land_use = add_tothhs(land_use, households)
@@ -846,10 +942,16 @@ def preprocess(settings: PreprocessorSettings) -> tuple[pd.DataFrame, pd.DataFra
         original_land_use,
     )
 
-    # Preprocess fare skim matrix into TOD format if needed
-    preprocess_fare_skim(settings)
-    # Create flat-fare skim with TOD format if needed
-    create_flat_fare_skim(settings, land_use)
+    fare_skim_file = settings.fare_skim_input_file if hasattr(settings, 'fare_skim_input_file') else None
+
+    if fare_skim_file is not None:
+        # Preprocess fare skim matrix into TOD format if needed
+        print(f"Preprocessing fare skim matrix from {fare_skim_file}")
+        preprocess_fare_skim(settings)
+    else:
+        print("No fare skim input file provided, creating flat-fare skim.")
+        # Create flat-fare skim with TOD format if needed
+        create_flat_fare_skim(settings, land_use)
     
     return households, persons, land_use
 

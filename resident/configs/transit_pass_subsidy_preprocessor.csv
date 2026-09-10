@@ -1,5 +1,7 @@
 Description,Target,Expression
-,_transit_ivt_home_to_work_walk_peak,"skim_dict.lookup(persons.home_zone_id, persons.workplace_zone_id, ('WTW_TIV', 'AM'))"
-,_transit_ivt_home_to_work_drive_peak,"skim_dict.lookup(persons.home_zone_id, persons.workplace_zone_id, ('KTW_TIV', 'AM')) if KNR_available else 0"
-,transit_subsidy_available,((_transit_ivt_home_to_work_walk_peak > 0) | (_transit_ivt_home_to_work_drive_peak > 0)) & (persons.workplace_zone_id > 0)
+,transit_ivt_home_to_work_walk_peak,"skim_dict.lookup(persons.home_zone_id, persons.workplace_zone_id, ('WTW_TIV', 'AM'))"
+,transit_ivt_home_to_work_drive_peak,"skim_dict.lookup(persons.home_zone_id, persons.workplace_zone_id, ('KTW_TIV', 'AM')) if KNR_available else 0"
+,transit_ivt_home_to_school_walk_peak,"skim_dict.lookup(persons.home_zone_id, persons.school_zone_id, ('WTW_TIV', 'AM'))"
+,transit_ivt_home_to_school_drive_peak,"skim_dict.lookup(persons.home_zone_id, persons.school_zone_id, ('KTW_TIV', 'AM')) if KNR_available else 0"
+,transit_subsidy_available,persons.is_worker
 ,trn_wk_access_hh,"np.where(persons.workplace_zone_id > 0, reindex(accessibility.trPkHH, persons.workplace_zone_id), 0)"

@@ -73,6 +73,8 @@ def putskim_postprocessing(mtx_dseg,knr_flag):
     pla    = h.GetMatrixRaw(Visum, {"CODE": "PLA"     , "DSegCode": mtx_dseg})  # Stop type constant (raw sum)
     stc    = h.GetMatrixRaw(Visum, {"CODE": "STC"     , "DSegCode": mtx_dseg})  # Stop type constant (final average)
     vtc    = h.GetMatrixRaw(Visum, {"CODE": "VTC"     , "DSegCode": mtx_dseg})  # Vehicle type constant
+    acd    = h.GetMatrixRaw(Visum, {"CODE": "ACD"     , "DSegCode": mtx_dseg})  # Access Distance (used for KNR-Transit-Walk drive  to  transit distance)
+    egd    = h.GetMatrixRaw(Visum, {"CODE": "EGD"     , "DSegCode": mtx_dseg})  # Egress Distance (used for Walk-Transit-KNR drive from transit distance)
 
     # Process matrices
     # Set maximum walk time allowed
@@ -135,6 +137,8 @@ def putskim_postprocessing(mtx_dseg,knr_flag):
     pla    = np.where(twpt == 9999.00, 9999.00, pla)
     stc    = np.where(twpt == 9999.00, 9999.00, stc)
     vtc    = np.where(twpt == 9999.00, 9999.00, vtc)
+    acd    = np.where(twpt == 9999.00, 9999.00, acd)
+    egd    = np.where(twpt == 9999.00, 9999.00, egd)
 
     # Perceived In-vehicle time by Mode
     if mtx_dseg == 'amPuT' or mtx_dseg == 'pmPuT':                      # Peak
@@ -186,7 +190,8 @@ def putskim_postprocessing(mtx_dseg,knr_flag):
     h.SetMatrixRaw(Visum, {"CODE": "PLA"     , "DSegCode": mtx_dseg}, pla   )  # Stop type constant (raw sum)
     h.SetMatrixRaw(Visum, {"CODE": "STC"     , "DSegCode": mtx_dseg}, stc   )  # Stop type constant (final average)
     h.SetMatrixRaw(Visum, {"CODE": "VTC"     , "DSegCode": mtx_dseg}, vtc   )  # Vehicle type constant
-
+    h.SetMatrixRaw(Visum, {"CODE": "ACD"     , "DSegCode": mtx_dseg}, acd   )  # Access (used for KNR-Transit-Walk drive to transit time)
+    h.SetMatrixRaw(Visum, {"CODE": "EGD"     , "DSegCode": mtx_dseg}, egd   )  # Egress (used for Walk-Transit-KNR drive from transit time)
 
 # Read user inputs from Visum
 proj_dir = Visum.GetPath(2)

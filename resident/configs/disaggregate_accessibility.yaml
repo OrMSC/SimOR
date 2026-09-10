@@ -91,10 +91,9 @@ CREATE_TABLES:
                 DAP: # Mandatory, Non-mandatory
                     1: "M"
                     2: "N"
-                # FIXME this should be updated when occupation_xwalk is updated
-                OCCP: # occupation codes
+                occupation: # occupation codes
                     1: 1   # Management Occupations
-                    2: -1    # Non-worker
+                    2: 999    # Non-worker
 
     PROTO_TOURS:
         index_col: proto_tour_id

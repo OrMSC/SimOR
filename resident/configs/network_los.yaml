@@ -16,12 +16,16 @@ taz_skims:
   - transitSkims*.omx
   - walkSkim.omx
   - fares.omx
+  - bike_taz_logsums_commute.omx
+  - bike_taz_logsums_noncommute.omx
 
 maz: land_use.csv
 
 maz_to_maz:
   tables:
     - maz_maz_walk.csv
+    - bike_maz_logsums_commute.csv
+    - bike_maz_logsums_noncommute.csv
   
   # maz_to_maz blending distance (missing or 0 means no blending)
   # max_blend_distance:

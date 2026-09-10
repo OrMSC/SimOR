@@ -30,6 +30,7 @@ SIMULATE_CHOOSER_COLUMNS:
   - num_non_escort_tours
   - num_add_shop_maint_tours
   - num_add_soc_discr_tours
+  - retired_adults_only_hh
 
 LOGSUM_SETTINGS: tour_mode_choice.yaml
 

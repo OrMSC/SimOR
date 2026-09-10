@@ -2,6 +2,7 @@
 .vscode/*
 resident/model_data/metro/data_full/*
 resident/model_data/skats/data_full/*
+resident/model_data/lcog/data_full/*
 resident/outputs/*
 
 # Unit test / coverage reports

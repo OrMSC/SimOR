@@ -1,5 +1,5 @@
 SAMPLE_SIZE: 30
-ESTIMATION_SAMPLE_SIZE: 10
+ESTIMATION_SAMPLE_SIZE: 30
 
 SIMULATE_CHOOSER_COLUMNS:
   - income_segment
@@ -48,20 +48,20 @@ CHOOSER_TABLE_NAME: persons_merged
 MODEL_SELECTOR: workplace
 
 # column in persons table used to segment choosers
-CHOOSER_SEGMENT_COLUMN_NAME: occupation
+CHOOSER_SEGMENT_COLUMN_NAME: work_segment
 
 # boolean column to filter choosers (True means keep)
 CHOOSER_FILTER_COLUMN_NAME: is_internal_worker
 
 # workplace segments mapped to occupation categories
 SEGMENT_IDS:
-  mngt_busi_scic_arts: mngt_busi_scic_arts 
-  white_collar: white_collar
-  blue_collar: blue_collar
-  sales_office: sales_office
+  mngt_busi_sci_health: mngt_busi_sci_health
+  services: services
+  sales_retail: sales_retail
   nat_res_cnstr_maint: nat_res_cnstr_maint
   prod_trans_move: prod_trans_move
   missing: missing
+
 
 # model adds these tables (informational - not added if commented out)
 SHADOW_PRICE_TABLE: workplace_shadow_prices

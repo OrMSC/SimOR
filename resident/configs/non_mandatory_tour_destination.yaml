@@ -3,6 +3,7 @@ SPEC: non_mandatory_tour_destination.csv
 COEFFICIENTS: non_mandatory_tour_destination_coefficients.csv
 
 SAMPLE_SIZE: 30
+ESTIMATION_SAMPLE_SIZE: 30
 
 SIZE_TERM_SELECTOR: non_mandatory
 

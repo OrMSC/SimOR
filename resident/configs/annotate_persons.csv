@@ -11,29 +11,27 @@ employment status type,pemploy,"pd.Series(np.zeros(len(persons)), index=persons.
 ,pemploy,"np.where((persons.age >= 16) & ((persons.ESR == 3) | (persons.ESR == 6)), PEMPLOY_NOT, pemploy)"
 ,pemploy,"np.where((persons.age>=16) & (persons.ESR != 3) & (persons.ESR != 6) & (persons.WKHP >= 35) & (persons.WKW >= 1) & (persons.WKW <= 4), PEMPLOY_FULL, pemploy)"
 student category,pstudent,"pd.Series(np.zeros(len(persons)), index=persons.index)"
-,pstudent,"np.where((pemploy == 1) & (persons.age >= 16), PSTUDENT_NOT, pstudent)"
-,pstudent,"np.where((pemploy == 1) & (persons.age < 16), PSTUDENT_GRADE_OR_HIGH, pstudent)"
+,pstudent,"np.where((pemploy == PEMPLOY_FULL) & (persons.age >= 16), PSTUDENT_NOT, pstudent)"
+,pstudent,"np.where((pemploy == PEMPLOY_FULL) & (persons.age < 16), PSTUDENT_GRADE_OR_HIGH, pstudent)"
 ,pstudent,"np.where((persons.SCHG < 1) & (persons.age >= 16), PSTUDENT_NOT, pstudent)"
 ,pstudent,"np.where((persons.SCHG < 1) & (persons.age < 16), PSTUDENT_GRADE_OR_HIGH, pstudent)"
-,pstudent,"np.where((persons.SCHG >= 15) & (persons.age >= 16) & (pemploy != 1), PSTUDENT_UNIVERSITY, pstudent)"
-,pstudent,"np.where((persons.SCHG >= 15) & (persons.age < 16) & (pemploy != 1), PSTUDENT_GRADE_OR_HIGH, pstudent)"
-,pstudent,"np.where((persons.age <= 19) & (pemploy != 1) & (persons.SCHG >=1) & (persons.SCHG<=14), PSTUDENT_GRADE_OR_HIGH, pstudent)"
-,pstudent,"np.where((persons.age > 19) & (pemploy != 1) & (persons.SCHG >=1) & (persons.SCHG<=14),  PSTUDENT_UNIVERSITY, pstudent)"
+,pstudent,"np.where((persons.SCHG >= 15) & (persons.age >= 16), PSTUDENT_UNIVERSITY, pstudent)"
+,pstudent,"np.where((persons.SCHG >= 15) & (persons.age < 16), PSTUDENT_GRADE_OR_HIGH, pstudent)"
+,pstudent,"np.where((persons.age <= 19) & (persons.SCHG >=1) & (persons.SCHG<=14), PSTUDENT_GRADE_OR_HIGH, pstudent)"
+,pstudent,"np.where((persons.age > 19) & (persons.SCHG >=1) & (persons.SCHG<=14),  PSTUDENT_UNIVERSITY, pstudent)"
 ,pstudent,"np.where(pstudent == 0, 3, pstudent)"
 person type,ptype,"pd.Series(PTYPE_NONWORK, index=persons.index)"
 ,ptype,"np.where(persons.age >= 65, PTYPE_RETIRED, ptype)"
 ,ptype,"np.where(pemploy == 2, PTYPE_PART, ptype)"
 ,ptype,"np.where(pemploy == 1,  PTYPE_FULL, ptype)"
-,ptype,"np.where((persons.age >= 5) & ((persons.age < 18) | ((persons.age == 18) & (pstudent == 1))), PTYPE_SCHOOL, ptype)"
+,ptype,"np.where(((persons.age >= 5) & (persons.age < 18)) | (persons.age.isin([18,19]) & (pstudent == PSTUDENT_GRADE_OR_HIGH)), PTYPE_SCHOOL, ptype)"
 ,ptype,"np.where(persons.age < 5, PTYPE_PRESCHOOL, ptype)"
 ,ptype,"np.where(pstudent == 2, PTYPE_UNIVERSITY, ptype)"
-# FIXME are these rules for preschoolers still wanted?,,
 is_student,is_student,"np.isin(pstudent, [PSTUDENT_GRADE_OR_HIGH, PSTUDENT_UNIVERSITY])"
-preschool age can go to preschool,is_student,"np.where(persons.age > GRADE_SCHOOL_MIN_AGE, is_student, True)"
 is_preschool,_is_preschool,(pstudent == PSTUDENT_GRADE_OR_HIGH) & (persons.age <= GRADE_SCHOOL_MIN_AGE)
 is_gradeschool,_is_gradeschool,(pstudent == PSTUDENT_GRADE_OR_HIGH) & (persons.age <= GRADE_SCHOOL_MAX_AGE) & (persons.age > GRADE_SCHOOL_MIN_AGE)
 is_highschool,_is_highschool,(pstudent == PSTUDENT_GRADE_OR_HIGH) & (persons.age > GRADE_SCHOOL_MAX_AGE)
-# is_university is actually hard coded in mandatory scheduling(!) so need it here,, 
+# is_university is actually hard coded in mandatory scheduling(!) so need it here,,
 is_university,is_university,pstudent == PSTUDENT_UNIVERSITY
 school_segment preschool,school_segment,"np.where(_is_preschool, SCHOOL_SEGMENT_PREK, SCHOOL_SEGMENT_NONE)"
 school_segment gradeschool,school_segment,"np.where(_is_gradeschool, SCHOOL_SEGMENT_GRADE, school_segment)"
@@ -57,9 +55,4 @@ home_zone_id,home_zone_id,"reindex(households.home_zone_id, persons.household_id
 travel time sensitivity factor for work travel,time_factor_work,"np.minimum(_max_time_factor, np.maximum(rng.lognormal_for_df(persons, mu=_mean_work, sigma=_stddev_work, scale=True), _min_time_factor))"
 travel time sensitivity factor for non-work travel,time_factor_nonwork,"np.minimum(_max_time_factor, np.maximum(rng.lognormal_for_df(persons, mu=_mean_nonwork, sigma=_stddev_nonwork, scale=True), _min_time_factor))  "
 #,,
-# FIXME need naics and SOC codes ,,
-,_naics_code,"np.where(persons.naics2_original_code=='3M', 3000, np.where(persons.naics2_original_code=='4M', 4000, np.where(persons.naics2_original_code=='MIL',9000, persons.naics2_original_code))) if 'naics2_original_code' in persons.columns else 0"
-,naics_code,_naics_code.astype('int') if all(_naics_code!=0) else 0
-#,,
-# FIXME does filling with -1 make sense here? depends on what the missing values mean,,
-occupation categories mapped to workplace segments,occupation,persons.OCCP.fillna(-1).map(occupation_xwalk)
+occupation categories mapped to workplace segments,work_segment,persons.occupation.fillna(999).map(occupation_xwalk)

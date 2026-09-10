@@ -38,6 +38,9 @@ class ExternalIdentificationSettings(LogitComponentSettings, extra="forbid"):
 
     preprocessor: PreprocessorSettings | None = None
 
+    EXTERNAL_WORKER_ALT: int | None = 0
+    EXTERNAL_TOUR_ALT: int | None = 0
+
 
 def determine_closest_external_station(
     state, choosers, skim_dict, origin_col="home_zone_id"
@@ -183,7 +186,7 @@ def external_worker_identification(
 
     if external_col_name is not None:
         persons[external_col_name] = (
-            (choices == 0).reindex(persons.index).fillna(False).astype(bool)
+            (choices == model_settings.EXTERNAL_WORKER_ALT).reindex(persons.index).fillna(False).astype(bool)
         )
     if internal_col_name is not None:
         persons[internal_col_name] = persons[filter_col] & ~persons[external_col_name]
@@ -277,12 +280,10 @@ def set_external_tour_variables(state, tours, choices, model_settings, trace_lab
 
     if external_col_name is not None:
         tours[external_col_name] = (
-            (choices == 0).reindex(tours.index).fillna(False).astype(bool)
+            (choices == model_settings.EXTERNAL_TOUR_ALT).reindex(tours.index).fillna(False).astype(bool)
         )
     if internal_col_name is not None:
-        tours[internal_col_name] = (
-            (choices == 1).reindex(tours.index).fillna(True).astype(bool)
-        )
+        tours[internal_col_name] = ~tours[external_col_name]
 
     # - annotate tours table
     if "annotate_tours" in model_settings:
@@ -304,7 +305,7 @@ def external_non_mandatory_identification(
     network_los: los.Network_LOS,
     model_settings: ExternalIdentificationSettings | None = None,
     model_settings_file_name: str = "external_non_mandatory_identification.yaml",
-    trace_label: str = "external_non_mandatory_identification",
+    trace_label: str = "external_non_mandatory_tour_identification",
     trace_hh_id: bool = False,
 ) -> None:
     """

@@ -14,8 +14,6 @@ util_hh_income_verylow,household income <15k,@(df.income<15000),coef_household_i
 util_hh_income_low,household income 15k-30k,@((df.income>=15000) & (df.income<30000)),coef_household_income_1530k_0_CARS,,coef_household_income_1530k_2_CARS,coef_household_income_1530k_3_CARS,coef_household_income_1530k_4_CARS
 util_hh_income_mid,household income 30-60k,@((df.income>=30000) & (df.income<60000)),coef_household_income_3060k_0_CARS,,coef_household_income_3060k_2_CARS,coef_household_income_3060k_3_CARS,coef_household_income_3060k_4_CARS
 util_hh_income_veryhigh,household income 100k+,@(df.income>=100000),coef_household_income_100k_0_CARS,,coef_household_income_100k_2_CARS,coef_household_income_100k_3_CARS,coef_household_income_100k_4_CARS
-# FIXME no bldgsz equivalent in the Metro data,,,,,,
-# util_attached,attached dwelling,"@np.where(df.bldgsz == 2, 0, 1)",coef_attached_0_CARS,,coef_attached_2_CARS,coef_attached_3_CARS,coef_attached_4_CARS
 # 0.785 sq miles in 1/2 mile radius * 640 acres per square mile = 502,,,,,,,
 util_intersection_density,Intersection count in 1/2 mile radius of household,totint/502,coef_intersection_density_0_CARS,,coef_intersection_density_2_CARS,coef_intersection_density_3_CARS,coef_intersection_density_4_CARS
 util_pop_density,Population Density in 1/2 mile radius of household,popden,coef_population_density_0_CARS,,coef_population_density_2_CARS,coef_population_density_34_CARS,coef_population_density_34_CARS

@@ -78,6 +78,7 @@ LOGSUM_CHOOSER_COLUMNS:
   - age
   - SEX
   - auto_ownership
+  - num_drivers
   - num_adults
   - ptype
   - number_of_participants

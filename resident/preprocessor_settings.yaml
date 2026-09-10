@@ -1,64 +1,90 @@
-data_dir: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\raw
+data_dir: ..\skimming_and_assignment\maz_maz_stop_skims\Visum_Outputs_LCOG
 # output_dir: null  # null means overwrite input files
-output_dir: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full
-households_file: households.csv
-persons_file: persons.csv
-land_use_file: land_use.csv
+output_dir: model_data\lcog\data_full
+households_file: synthetic_households.csv
+persons_file: synthetic_persons.csv
+land_use_file: MAZ_tbl_ea.csv
 
-maz_shp_file: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\raw\MAZs_22333_2025-11-20.shp
+maz_shp_file: ..\skimming_and_assignment\maz_maz_stop_skims\Visum_Outputs_LCOG\MAZ_poi_surface_ea.shp
 
-maz_stop_walk_file: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\maz_stop_walk.csv
-maz_maz_walk_file:  C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\maz_maz_walk.csv
+maz_stop_walk_file: ..\skimming_and_assignment\maz_maz_stop_skims\output\lcog_2way\maz_stop_walk.csv
+maz_maz_walk_file:  ..\skimming_and_assignment\maz_maz_stop_skims\output\lcog_2way\maz_maz_walk.csv
 
 # Variable-fare transit skims
 # Non-TOD segmented transit fare skim file processed into fares.omx segmented by TOD with matrices fare__[time_of_day]
+# If None, fare skims will be created with a flat fare rate for all time periods as defined below in the transit_fare_system section
 fare_skim_input_file: 
 times_of_day: ["EA", "AM", "MD", "PM", "EV"]
 
 # Flat-fare transit skims
-# Add value to create flat-rate fares.omx, leave empty if skim does not need to be created
-flat_fare_rate: 1.60
+transit_fare_system:
+  # name: LTD
+  # flat_fare_rate: 1.75
+  # name: CHERRIOTS
+  # flat_fare_rate: 1.60
+  name: TRIMET
+  flat_fare_rate: 2.80
+  # name: RVTD
+  # flat_fare_rate: 2.00
+  # name: GRANTS_PASS
+  # flat_fare_rate: 1.00
+  
 
 # Land use settings
-nodes_file: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\raw\Network_node.shp
-links_file: C:\projects\odot_joint_estimation\pnr\SimOR\resident\model_data\metro\data_full\raw\Network_link.shp
+nodes_file: ..\skimming_and_assignment\maz_maz_stop_skims\Visum_Outputs_LCOG\AllStreets_Network_node.shp
+links_file: ..\skimming_and_assignment\maz_maz_stop_skims\Visum_Outputs_LCOG\AllStreets_Network_link.shp
 density_radius: 0.50 # walk radius (miles) for density calculations
 
 # If expected parking costs were calculated, add expected parking costs
 # Leave empty if exp costs do not need to be added
-exp_parking_costs_file: C:\Documents\expected_parking_data.csv
+exp_parking_costs_file: ..\skimming_and_assignment\maz_maz_stop_skims\Visum_Outputs_LCOG\expected_parking_data.csv
 
 # Intersection counts
-count_intersections: False 
+count_intersections: True 
 # If count_intersections is False, provide col name with intersection counts
-icnt_col: INTHMI
+icnt_col: 
 
 # Network filter for intersection counts
 # Specify col name and values to filter on
 link_filter_col: TYPENO
 
-# SKATS
+# LCOG
 keep_link_types: [  
-  1,  # 1
-  # 11, # ramps 
-  # 12, # ramps dr
-  # 20, # princ intersate
-  # 21, # princ state highway
-  22, # princ parkway
-  31, # major art parkway
-  32, # major art
-  33, # rural arterial
-  41, # minor arterial
-  51, # collector urban
-  52, # collector rural major
-  53, # collector rural minor
-  61, # local urban
-  62, # local rural
-  68, # urban street low speed
-  69, # rural street low speed
-  # 71, # driveway
-  # 99  # no car 
+  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+  # 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  # 21, 22, 23, 24, 25, 26, 27, 28, 29, 
+  30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+  41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+  51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+  61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+  71, 
+  # 72, 73, 74, 75, 76, 77, 78, 79, 80,
+  # 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+  # 91, 92, 93, 94, 95, 96, 97, 98, 99,
 ]
+
+# SKATS
+# keep_link_types: [  
+#   1,  # 1
+#   # 11, # ramps 
+#   # 12, # ramps dr
+#   # 20, # princ intersate
+#   # 21, # princ state highway
+#   22, # princ parkway
+#   31, # major art parkway
+#   32, # major art
+#   33, # rural arterial
+#   41, # minor arterial
+#   51, # collector urban
+#   52, # collector rural major
+#   53, # collector rural minor
+#   61, # local urban
+#   62, # local rural
+#   68, # urban street low speed
+#   69, # rural street low speed
+#   # 71, # driveway
+#   # 99  # no car 
+# ]
 
 # Metro
 # keep_link_types: [  
