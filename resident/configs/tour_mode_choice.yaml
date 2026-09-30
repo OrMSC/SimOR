@@ -69,29 +69,4 @@ annotate_tours:
   TABLES:
     - tours
 
-
-# to reduce memory needs filter chooser table to these fields
-LOGSUM_CHOOSER_COLUMNS:
-  - tour_type
-  - hhsize
-  - density_index
-  - age
-  - SEX
-  - auto_ownership
-  - num_drivers
-  - num_adults
-  - ptype
-  - number_of_participants
-  - tour_category
-  - value_of_time
-  - free_parking_at_work
-  - income_segment
-  - income
-  - time_factor_work
-  - time_factor_nonwork
-  - num_escortees
-  - ebike_owner
-  - transit_pass_subsidy
-  - transit_pass_ownership
-
 MODE_CHOICE_LOGSUM_COLUMN_NAME: mode_choice_logsum

@@ -46,9 +46,3 @@ skim_time_periods:
     # EV: 7 PM to midnight
     periods: [0, 6, 12, 24, 32, 42, 48]  # time periods to match documentation
     labels: &skim_time_period_labels ['EA', 'AM', 'MD', 'PM', 'EV', 'EA']
-
-demographic_segments: &demographic_segments
-  - &low_income_segment_id 0
-  - &high_income_segment_id 1
-
-
